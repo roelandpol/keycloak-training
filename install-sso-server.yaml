@@ -53,19 +53,11 @@
             remote_src: true
           become: yes
 
-https-key-store-file conf/sso.lab.example.com.p12
-https-key-store-password redhat123
-hostname sso.lab.example.com
-
-db-url-host sso.lab.example.com
-db-username postgres
-db-password postgres
-
         - name: Config
           lineinfile:
             path: /opt/rhbk-24.0.8/conf/keycloak.conf
-            regexp: 
-            line:
+            regexp: "{{ item.regexp }}"
+            line: "{{ item.line }}"
           with_items:
           - { regexp: '^https-key-store-file ', line: 'https-key-store-file conf/sso.lab.example.com.p12' }
           - { regexp: '^https-key-store-password ', line: 'https-key-store-password redhat123' }
@@ -74,7 +66,7 @@ db-password postgres
           - { regexp: '^db-username ', line: 'db-username postgres' }
           - { regexp: '^db-password ', line: 'db-password postgres' }
         - name: Create SSO admin user
-          command: bash -c 'curl -v --retry-connrefused --retry 100 --retry-delay 3 -k "https://localhost:8443/"  -H "Cookie: WELCOME_STATE_CHECKER=checker" -H "Content-Type: application/x-www-form-urlencoded" --data-raw "username=admin&password=redhat&passwordConfirmation=student&stateChecker=checker"'
+          command: "curl -v --retry-connrefused --retry 100 --retry-delay 3 -k 'https://localhost:8443/'  -H 'Cookie: WELCOME_STATE_CHECKER=checker' -H 'Content-Type: application/x-www-form-urlencoded' --data-raw 'username=admin&password=redhat&passwordConfirmation=student&stateChecker=checker"
           register: admin_result
           become: no
         - name: Start keycloak on boot
@@ -106,7 +98,7 @@ db-password postgres
             state: restarted
  
         - name: Create SSO admin user
-          command: bash -c 'curl -v --retry-connrefused --retry 100 --retry-delay 3 -k "https://localhost:8443/"  -H "Cookie: WELCOME_STATE_CHECKER=checker" -H "Content-Type: application/x-www-form-urlencoded" --data-raw "username=admin&password=redhat&passwordConfirmation=student&stateChecker=checker"'
+          command: "curl -v --retry-connrefused --retry 100 --retry-delay 3 -k 'https://localhost:8443/'  -H 'Cookie: WELCOME_STATE_CHECKER=checker' -H 'Content-Type: application/x-www-form-urlencoded' --data-raw 'username=admin&password=redhat&passwordConfirmation=student&stateChecker=checker"
           register: admin_result
           become: no
  

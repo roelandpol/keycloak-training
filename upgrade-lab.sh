@@ -17,6 +17,13 @@ ssh student@sso -- rm *.zip
 scp $SCRIPT_DIR/rhbk-24.0.8.zip student@sso:
 
 # Replace playbooks
-cp $SCRIPT_DIR/install-sso-server.yaml .venv/labs/lib/python3.6/site-packages/do313/ansible/common/
+cp $SCRIPT_DIR/install-sso-server.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/common/
+
+# Startup script
+cp $SCRIPT_DIR/rhbk.service $HOME
+
+# Java version on RHSSO machine
+ssh rhsso@sso sudo yum -y install java-17-openjdk
+ssh rhsso@sso sudo ln -sf /usr/lib/jvm/jre-17/bin/java /etc/alternatives/java
 
 
