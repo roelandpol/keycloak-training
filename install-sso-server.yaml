@@ -66,7 +66,7 @@
           - { regexp: '^db-username ', line: 'db-username postgres' }
           - { regexp: '^db-password ', line: 'db-password postgres' }
         - name: Create SSO admin user
-          command: "curl -v --retry-connrefused --retry 100 --retry-delay 3 -k 'https://localhost:8443/'  -H 'Cookie: WELCOME_STATE_CHECKER=checker' -H 'Content-Type: application/x-www-form-urlencoded' --data-raw 'username=admin&password=redhat&passwordConfirmation=student&stateChecker=checker"
+          command: "curl -v --retry-connrefused --retry 100 --retry-delay 3 -k 'https://localhost:8443/'  -H 'Cookie: WELCOME_STATE_CHECKER=checker' -H 'Content-Type: application/x-www-form-urlencoded' --data-raw 'username=admin&password=redhat&passwordConfirmation=student&stateChecker=checker'"
           register: admin_result
           become: no
         - name: Start keycloak on boot
@@ -98,7 +98,7 @@
             state: restarted
  
         - name: Create SSO admin user
-          command: "curl -v --retry-connrefused --retry 100 --retry-delay 3 -k 'https://localhost:8443/'  -H 'Cookie: WELCOME_STATE_CHECKER=checker' -H 'Content-Type: application/x-www-form-urlencoded' --data-raw 'username=admin&password=redhat&passwordConfirmation=student&stateChecker=checker"
+          command: "curl -v --retry-connrefused --retry 100 --retry-delay 3 -k 'https://localhost:8443/'  -H 'Cookie: WELCOME_STATE_CHECKER=checker' -H 'Content-Type: application/x-www-form-urlencoded' --data-raw 'username=admin&password=redhat&passwordConfirmation=student&stateChecker=checker'"
           register: admin_result
           become: no
  
