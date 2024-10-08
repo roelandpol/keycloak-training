@@ -1,0 +1,121 @@
+- name: Copy certs to sso machine
+  hosts: workstation
+  tasks:
+    - name: Copy p12 file for https
+      shell: >
+       scp /home/student/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/common/sso.lab.example.com.p* rhsso@sso:/home/rhsso
+- name: Recreate database
+  import_playbook: recreate-db.yaml
+  when:
+    - recreate_database|bool
+ 
+- name: Install SSO
+  hosts: sso
+  remote_user: rhsso
+ 
+  vars:
+    db_user: postgres
+    db_password: postgres
+    db_name: keycloak
+    sso_user: rhsso
+ 
+  tasks:
+    - name: Verify if SSO service is active
+      systemd:
+        name: rhbk
+      register: rhbk_service_status
+ 
+    - name: Install and configure Red Hat SSO if the service is not active
+      block:
+        - name: Copy Red Hat SSO zip file
+          copy:
+            src: /home/student/rhbk-24.0.8.zip
+            dest: /home/rhsso/
+            owner: "{{ sso_user }}"
+            group: "{{ sso_user }}"
+            remote_src: true
+          become: yes
+ 
+        - name: Unzip Red Hat SSO
+          unarchive:
+            src: /home/rhsso/rhbk-24.0.8.zip
+            dest: /opt/
+            creates: /opt/rhbk-24.0.8
+            owner: "{{ sso_user }}"
+            group: "{{ sso_user }}"
+            remote_src: true
+        - name: Copy keystore for https
+          copy:
+            src: /home/rhsso/sso.lab.example.com.p12
+            dest: /opt/rhbk-24.0.8/conf/
+            owner: "{{ sso_user }}"
+            group: "{{ sso_user }}"
+            remote_src: true
+          become: yes
+
+https-key-store-file conf/sso.lab.example.com.p12
+https-key-store-password redhat123
+hostname sso.lab.example.com
+
+db-url-host sso.lab.example.com
+db-username postgres
+db-password postgres
+
+        - name: Config
+          lineinfile:
+            path: /opt/rhbk-24.0.8/conf/keycloak.conf
+            regexp: 
+            line:
+          with_items:
+          - { regexp: '^https-key-store-file ', line: 'https-key-store-file conf/sso.lab.example.com.p12' }
+          - { regexp: '^https-key-store-password ', line: 'https-key-store-password redhat123' }
+          - { regexp: '^hostname ', line: 'hostname sso.lab.example.com' }
+          - { regexp: '^db-url-host ', line: 'db-url-host sso.lab.example.com' }
+          - { regexp: '^db-username ', line: 'db-username postgres' }
+          - { regexp: '^db-password ', line: 'db-password postgres' }
+        - name: Create SSO admin user
+          command: bash -c 'curl -v --retry-connrefused --retry 100 --retry-delay 3 -k "https://localhost:8443/"  -H "Cookie: WELCOME_STATE_CHECKER=checker" -H "Content-Type: application/x-www-form-urlencoded" --data-raw "username=admin&password=redhat&passwordConfirmation=student&stateChecker=checker"'
+          register: admin_result
+          become: no
+        - name: Start keycloak on boot
+          systemd:
+            name: rhbk
+            enabled: yes
+        - name: Start keycloak
+          systemd:
+            name: rhbk
+            state: started
+            daemon_reload: yes
+ 
+      when:
+        (rhbk_service_status.status.ActiveState != "active")
+ 
+ 
+    - name: Configure Red Hat SSO if the service is active and database is recreated
+      block:
+        - name: Stop jboss-eap-rhel service
+          systemd:
+            name: rhbk
+            state: stopped
+          when:
+            (rhbk_service_status.status.ActiveState == "active")
+ 
+        - name: Restart PostgreSQL service
+          systemd:
+            name: postgresql
+            state: restarted
+ 
+        - name: Create SSO admin user
+          command: bash -c 'curl -v --retry-connrefused --retry 100 --retry-delay 3 -k "https://localhost:8443/"  -H "Cookie: WELCOME_STATE_CHECKER=checker" -H "Content-Type: application/x-www-form-urlencoded" --data-raw "username=admin&password=redhat&passwordConfirmation=student&stateChecker=checker"'
+          register: admin_result
+          become: no
+ 
+        - name: Start jboss-eap-rhel service
+          systemd:
+            name: rhbk
+            state: started
+            daemon_reload: yes
+ 
+      when:
+        (rhbk_service_status.status.ActiveState == "active")
+ 
