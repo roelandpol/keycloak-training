@@ -18,6 +18,9 @@ scp $SCRIPT_DIR/rhbk-24.0.8.zip student@sso:
 
 # Replace playbooks
 cp $SCRIPT_DIR/install-sso-server.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/common/
+sed -i 's/rh-sso-7.6/rhbk-24.0.8/g' -- $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/common/import-base-realm.yaml
+chattr +i $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/common/install-sso-server.yaml
+chattr +i $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/common/import-base-realm.yaml
 
 # Startup script
 cp $SCRIPT_DIR/rhbk.service $HOME
@@ -25,5 +28,6 @@ cp $SCRIPT_DIR/rhbk.service $HOME
 # Java version on RHSSO machine
 ssh rhsso@sso sudo yum -y install java-17-openjdk
 ssh rhsso@sso sudo ln -sf /usr/lib/jvm/jre-17/bin/java /etc/alternatives/java
-
+scp /home/student/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/common/sso.lab.example.com.pem rhsso@sso:/home/rhsso/
+sudo keytool -keystore /usr/lib/jvm/jre-17/lib/security/cacerts -import -file /home/rhsso/sso.lab.example.com.pem -storepass changeit -trustcacerts -noprompt
 

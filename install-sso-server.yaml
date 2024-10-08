@@ -3,7 +3,7 @@
   tasks:
     - name: Copy p12 file for https
       shell: >
-       scp /home/student/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/common/sso.lab.example.com.p* rhsso@sso:/home/rhsso
+       scp /home/student/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/common/sso.lab.example.com.p12 rhsso@sso:/home/rhsso
     - name: Copy p12 file for https
       shell: >
         scp /home/student/rhbk.service rhsso@sso:/home/rhsso
