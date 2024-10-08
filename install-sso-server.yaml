@@ -93,9 +93,10 @@
             state: started
             daemon_reload: yes
         - name: Create SSO admin user
-          command: "curl -v --retry-connrefused --retry 100 --retry-delay 3 -k 'https://localhost:8443/'  -H 'Cookie: WELCOME_STATE_CHECKER=checker' -H 'Content-Type: application/x-www-form-urlencoded' --data-raw 'username=admin&password=redhat&passwordConfirmation=student&stateChecker=checker'"
+          command: "curl -v --retry-connrefused --retry 100 --retry-delay 3 -k 'https://localhost:8443/'  -H 'Cookie: WELCOME_STATE_CHECKER=checker' -H 'Content-Type: application/x-www-form-urlencoded' --data-raw 'username=admin&password=redhat&passwordConfirmation=redhat&stateChecker=checker'"
           register: admin_result
           become: no
+          # returns "User created"
  
       when:
         (rhbk_service_status.status.ActiveState != "active")
@@ -122,7 +123,7 @@
             daemon_reload: yes
 
         - name: Create SSO admin user
-          command: "curl -v --retry-connrefused --retry 100 --retry-delay 3 -k 'https://localhost:8443/'  -H 'Cookie: WELCOME_STATE_CHECKER=checker' -H 'Content-Type: application/x-www-form-urlencoded' --data-raw 'username=admin&password=redhat&passwordConfirmation=student&stateChecker=checker'"
+          command: "curl -v --retry-connrefused --retry 100 --retry-delay 3 -k 'https://localhost:8443/'  -H 'Cookie: WELCOME_STATE_CHECKER=checker' -H 'Content-Type: application/x-www-form-urlencoded' --data-raw 'username=admin&password=redhat&passwordConfirmation=redhat&stateChecker=checker'"
           register: admin_result
           become: no
  
