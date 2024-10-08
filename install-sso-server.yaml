@@ -87,11 +87,11 @@
           systemd:
             name: rhbk
             enabled: yes
+            daemon_reload: yes
         - name: Start keycloak
           systemd:
             name: rhbk
             state: started
-            daemon_reload: yes
         - name: Create SSO admin user
           command: "curl -v --retry-connrefused --retry 100 --retry-delay 3 -k 'https://localhost:8443/'  -H 'Cookie: WELCOME_STATE_CHECKER=checker' -H 'Content-Type: application/x-www-form-urlencoded' --data-raw 'username=admin&password=redhat&passwordConfirmation=redhat&stateChecker=checker'"
           register: admin_result
