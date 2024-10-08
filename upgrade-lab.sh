@@ -1,9 +1,9 @@
 # Our directory
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-# Reconfigure git repository after bootstrap
+# Reconfigure git repository after bootstrap since git does not work for tinyurl redirects
 REMOTE_URL=$(git -C $SCRIPT_DIR remote get-url origin)
-ORIGINAL_URL=$(curl -Ls -o /dev/null -w %{url_effective} https://tinyurl.com/rhbkws)
+ORIGINAL_URL=$(curl -Ls -o /dev/null -w %{url_effective} $REMOTE_URL)
 git -C $SCRIPT_DIR remote set-url origin $ORIGINAL_URL
 
 # Setup git LFS and checkout binaries
@@ -18,9 +18,13 @@ scp $SCRIPT_DIR/rhbk-24.0.8.zip student@sso:
 
 # Replace playbooks
 cp $SCRIPT_DIR/install-sso-server.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/common/
+cp $SCRIPT_DIR/remove-sso-server.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/common/
 sed -i 's/rh-sso-7.6/rhbk-24.0.8/g' -- $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/common/import-base-realm.yaml
+sed -i 's/jboss-eap-rhel/rhbk/g' -- $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/common/recreate-db.yaml
 chattr +i $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/common/install-sso-server.yaml
+chattr +i $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/common/remove-sso-server.yaml
 chattr +i $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/common/import-base-realm.yaml
+chattr +i $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/common/recreate-db.yaml
 
 # Startup script
 cp $SCRIPT_DIR/rhbk.service $HOME
