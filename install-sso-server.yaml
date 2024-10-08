@@ -78,6 +78,11 @@
           - { regexp: '^db-url-host ', line: 'db-url-host sso.lab.example.com' }
           - { regexp: '^db-username ', line: 'db-username postgres' }
           - { regexp: '^db-password ', line: 'db-password postgres' }
+
+        - name: Optimize keycloak
+          command: "/opt/rhbk-24.0.8/bin/kc.sh build --db=postgres"
+          become: no
+ 
         - name: Start keycloak on boot
           systemd:
             name: rhbk
