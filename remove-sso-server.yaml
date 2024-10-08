@@ -1,0 +1,46 @@
+- name: Recreate database
+  import_playbook: recreate-db.yaml
+  when:
+    - recreate_database|bool
+ 
+- name: Uninstall SSO
+  hosts: sso
+  remote_user: rhsso
+ 
+  vars:
+    db_user: postgres
+    db_password: postgres
+    db_name: keycloak
+    sso_user: rhsso
+ 
+  tasks:
+    - name: Verify if SSO folder exists
+      stat:
+        path: /opt/rhbk-24.0.8
+      register: rhsso_folder
+ 
+    - name: Remove Red Hat SSO if the service is active
+      block:
+        - name: Stop and disable jboss-eap-rhel service
+          systemd:
+            name: rhbk
+            state: stopped
+            enabled: no
+          ignore_errors: true
+ 
+        - name: Remove service startup script from /etc/init.d
+          file:
+            path: /etc/systemd/system/rhbk.service
+            state: absent
+ 
+        - name: Remove RH SSO folder
+          file:
+            path: /opt/rhbk-24.0.8
+            state: absent
+ 
+        - name: Reload systemd daemon
+          systemd:
+            daemon_reload: yes
+ 
+      when:
+        rhsso_folder.stat.exists
