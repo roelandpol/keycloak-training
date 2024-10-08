@@ -1,0 +1,12 @@
+[Unit]
+Description=Red Hat build of Keycloak
+
+[Service]
+User=rhsso
+WorkingDirectory=/opt/rhbk-24.0.8
+ExecStart=/opt/rhbk-24.0.8/bin/kc.sh start --optimized
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
