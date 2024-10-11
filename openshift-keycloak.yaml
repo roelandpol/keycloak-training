@@ -16,4 +16,12 @@ spec:
       memory: 500M
     requests:
       memory: 100M
-
+  db:
+    usernameSecret:
+      name: sso-db-credentials
+      key: username
+    passwordSecret:
+      name: sso-db-credentials
+      key: password
+    vendor: postgres
+    url: 'jdbc:postgresql://sso.lab.example.com/keycloak'      
