@@ -1,0 +1,19 @@
+apiVersion: k8s.keycloak.org/v2alpha1
+kind: Keycloak
+metadata:
+  labels:
+    app: sso
+  name: sso
+  namespace: rhsso
+spec:
+  hostname:
+    hostname: sso.apps.ocp4.example.com
+  http:
+    tlsSecret: sso-tls-secret
+  instances: 1
+  resources:
+    limits:
+      memory: 500M
+    requests:
+      memory: 100M
+
