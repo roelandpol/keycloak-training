@@ -3,6 +3,13 @@
 # Our directory
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
+# Verify OpenShift connection
+oc login -u admin -p redhat https://api.ocp4.example.com:6443
+if [ $? -gt 0 ]; then
+  echo "Failed to connect to OpenShift. Try again in 10 minutes"
+  exit 1
+fi
+
 # Reconfigure git repository after bootstrap since git does not work for tinyurl redirects
 REMOTE_URL=$(git -C $SCRIPT_DIR remote get-url origin)
 ORIGINAL_URL=$(curl -Ls -o /dev/null -w %{url_effective} $REMOTE_URL)
@@ -49,3 +56,6 @@ ssh rhsso@sso sudo keytool -keystore /usr/lib/jvm/jre-17/lib/security/cacerts -i
 sudo cp $SCRIPT_DIR/keycloak-openshift-ca.crt /usr/share/pki/ca-trust-source/anchors/
 sudo update-ca-trust
 
+# OpenShift chages
+oc replace -f $SCRIPT_DIR/openshift-pullsecret.yaml
+oc create -f $SCRIPT_DIR/openshift-catalogsource.yaml
