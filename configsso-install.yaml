@@ -1,0 +1,104 @@
+---
+#    _______________
+#   |  ___________  |
+#   | |           | |
+#   | |   o _ o   | |
+#   | |  \_____/  | |
+#   | |___________| |
+#   |_______________|
+#    __|_________|__
+#   / ************* \
+#  / *************** \
+#  -------------------
+#
+- name: Login to OpenShift cluster
+  shell:
+    cmd: oc login -u admin -p redhat {{ hub_cluster_host }}
+  environment:
+    KUBECONFIG: "{{ kubeconfig }}"
+
+- name: Check RHSSO operator
+  kubernetes.core.k8s_info:
+    api_version: operators.coreos.com/v1alpha1
+    kind: Subscription
+    name: "rhbk-operator"
+    namespace: "{{ sso_namespace }}"
+  register: rhsso_subs_r
+  ignore_errors: True
+
+- name: Check RHSSO operator Namespace
+  kubernetes.core.k8s_info:
+    kind: Namespace
+    name: "{{ sso_namespace }}"
+  register: rhsso_namespace_check
+
+- name: Create RHSSO operator Namespace
+  kubernetes.core.k8s:
+    name: "{{ sso_namespace }}"
+    api_version: v1
+    kind: Namespace
+    state: present
+  when: rhsso_namespace_check.resources[0].status is not defined
+
+- name: Create RHSSO OperatorGroup
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: operators.coreos.com/v1
+      kind: OperatorGroup
+      metadata:
+        name: rhbk-operator
+        namespace: "{{ sso_namespace }}"
+      spec:
+        targetNamespaces:
+        - "{{ sso_namespace }}"
+  when: rhsso_subs_r.resources[0].status is not defined
+
+- name: Create RHSSO Subscription
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: operators.coreos.com/v1alpha1
+      kind: Subscription
+      metadata:
+        name: rhbk-operator
+        namespace: "{{ sso_namespace }}"
+      spec:
+        sourceNamespace: openshift-marketplace
+        source: redhat-operators
+        channel: "stable-v24"
+        installPlanApproval: Automatic
+        name: rhbk-operator
+        namespace: "{{ sso_namespace }}"
+  when: rhsso_subs_r.resources[0].status is not defined
+
+- name: Retrieve CSV Subscription version
+  kubernetes.core.k8s_info:
+    api_version: operators.coreos.com/v1alpha1
+    kind: Subscription
+    name: "rhbk-operator"
+    namespace: "{{ sso_namespace }}"
+  register: sso_subs
+  retries: 30
+  delay: 10
+  until:
+  - sso_subs.resources | length > 0
+  - sso_subs.resources[0].status is defined
+  - sso_subs.resources[0].status.installedCSV is defined
+  when: rhsso_subs_r.resources[0].status is not defined
+
+- name: Wait until SSO Subscription is Ready
+  kubernetes.core.k8s_info:
+    api_version: operators.coreos.com/v1alpha1
+    kind: ClusterServiceVersion
+    name: "{{ sso_subs.resources[0].status.installedCSV }}"
+    namespace: "{{ sso_namespace }}"
+  register: rhsso_csv
+  retries: 30
+  delay: 20
+  until:
+  - rhsso_csv.resources | length > 0
+  - rhsso_csv.resources[0].status is defined
+  - rhsso_csv.resources[0].status.phase is defined
+  - rhsso_csv.resources[0].status.phase == "Succeeded"
+  when: rhsso_subs_r.resources[0].status is not defined
