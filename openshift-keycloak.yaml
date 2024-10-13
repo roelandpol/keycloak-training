@@ -2,8 +2,8 @@ apiVersion: k8s.keycloak.org/v2alpha1
 kind: Keycloak
 metadata:
   labels:
-    app: sso
-  name: sso
+    app: do313-keycloak
+  name: do313-keycloak
   namespace: rhsso
 spec:
   hostname:
@@ -24,4 +24,4 @@ spec:
       name: sso-db-credentials
       key: password
     vendor: postgres
-    url: 'jdbc:postgresql://sso.lab.example.com/keycloak'      
+    url: 'jdbc:postgresql://sso.lab.example.com/keycloak' 

@@ -59,3 +59,14 @@ sudo update-ca-trust
 # OpenShift chages
 oc replace -f $SCRIPT_DIR/openshift-pullsecret.yaml
 oc create -f $SCRIPT_DIR/openshift-catalogsource.yaml
+cp $SCRIPT_DIR/openshift-sso-db-credentials.yaml $HOME/DO313/
+cp $SCRIPT_DIR/openshift-sso-secret.yaml $HOME/DO313/
+cp $SCRIPT_DIR/openshift-keycloak.yaml $HOME/DO313/
+cp $SCRIPT_DIR/installsso-main.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/ocp-installsso/roles/rhsso_remove/tasks/main.yaml
+sudo chattr +i $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/ocp-installsso/roles/rhsso_remove/tasks/main.yaml
+cp $SCRIPT_DIR/configsso-install.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/ocp-configsso/roles/rhsso_install/tasks/main.yaml
+sudo chattr +i $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/ocp-configsso/roles/rhsso_install/tasks/main.yaml
+cp $SCRIPT_DIR/configsso-resources.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/solutions/ocp-configsso/resources.yaml 
+sudo chattr +i $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/solutions/ocp-configsso/resources.yaml 
+rm -f $HOME/DO313/labs/ocp-configsso/*
+cp $SCRIPT_DIR/configsso-realmimport.yaml $HOME/DO313/labs/ocp-configsso/
