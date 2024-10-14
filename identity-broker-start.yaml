@@ -1,0 +1,37 @@
+- name: Verify OCP is working
+  hosts: workstation
+  tasks:
+    - name: Verify OCP is working
+      shell: >
+        oc login -u admin -p redhat https://api.ocp4.example.com:6443
+
+    - name: Login as the developer user
+      shell: >
+        oc login -u developer -p developer https://api.ocp4.example.com:6443
+
+- name: Create finance-web app client
+  hosts: sso
+  gather_facts: false
+
+  tasks:
+      - name: Configure kcadm credentials
+        command: >
+          sh /opt/rhbk-24.0.8/bin/kcadm.sh config credentials
+          --server https://sso.lab.example.com:8443 --realm master
+          --user admin --password redhat
+
+      - name: Get clients
+        command: sh /opt/rhbk-24.0.8/bin/kcadm.sh get clients -r rhtraining --fields clientId
+        register: clients_output
+
+      - name: Create the finance-webapp client if it does not exist
+        command: >
+          sh /opt/rhbk-24.0.8/bin/kcadm.sh create clients -r rhtraining
+          -s clientId=finance-webapp -s enabled=true
+          -s rootUrl=http://localhost:8080/finance
+          -s clientAuthenticatorType=client-secret
+          -s secret=wRaGhUsdJKIe8PL0ShboprtyLDgzPd5H
+          -s protocol=openid-connect -s directAccessGrantsEnabled=false
+          -s publicClient=false
+        when: clients_output.stdout is not search('finance-webapp')
+

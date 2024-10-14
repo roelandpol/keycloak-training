@@ -34,6 +34,7 @@ cp $SCRIPT_DIR/install-sso-server.yaml $HOME/.venv/labs/lib/python3.6/site-packa
 cp $SCRIPT_DIR/remove-sso-server.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/common/
 cp $SCRIPT_DIR/start-install-ways.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/install-ways/start-install-ways.yaml
 cp $SCRIPT_DIR/finish-install-ways.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/install-ways/finish-install-ways.yaml
+cp $SCRIPT_DIR/identity-broker-start.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/identity-broker/start-identity-broker.yaml
 sed -i 's/rh-sso-7.6/rhbk-24.0.8/g' -- $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/common/import-base-realm.yaml
 # remove /auth prefix since RHBK does not use that anymore
 sed -i 's/\/auth//g' -- $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/common/import-base-realm.yaml
@@ -49,6 +50,11 @@ ssh rhsso@sso sudo yum -y install java-17-openjdk
 ssh rhsso@sso sudo ln -sf /usr/lib/jvm/jre-17/bin/java /etc/alternatives/java
 scp /home/student/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/common/sso.lab.example.com.pem rhsso@sso:/home/rhsso/
 ssh rhsso@sso sudo keytool -keystore /usr/lib/jvm/jre-17/lib/security/cacerts -import -file /home/rhsso/sso.lab.example.com.pem -storepass changeit -trustcacerts -noprompt
+scp $SCRIPT_DIR/rht-ca.crt rhsso@sso:/home/rhsso/
+scp $SCRIPT_DIR/rht-ts.crt rhsso@sso:/home/rhsso/
+ssh rhsso@sso sudo keytool -keystore /usr/lib/jvm/jre-17/lib/security/cacerts -import -file /home/rhsso/sso.lab.example.com.pem -storepass changeit -trustcacerts -noprompt
+ssh rhsso@sso sudo keytool -keystore /usr/lib/jvm/jre-17/lib/security/cacerts -import -file /home/rhsso/rht-ca.crt -storepass changeit -trustcacerts -noprompt
+ssh rhsso@sso sudo keytool -keystore /usr/lib/jvm/jre-17/lib/security/cacerts -import -file /home/rhsso/rht-ts.crt -storepass changeit -trustcacerts -noprompt
 
 # install keycloak on OpenShift CA cert on workstation machine
 sudo cp $SCRIPT_DIR/keycloak-openshift-ca.crt /usr/share/pki/ca-trust-source/anchors/
