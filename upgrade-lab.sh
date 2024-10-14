@@ -3,6 +3,10 @@
 # Our directory
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
+# We are breaking the default environment. Disable updates to the labs framework
+sudo systemctl disable dynolabs-update
+sudo sed -i 's/^systemctl/#systemctl/g' -- /etc/rc.d/rc.local-rht
+
 # Verify OpenShift connection
 oc login -u admin -p redhat https://api.ocp4.example.com:6443
 if [ $? -gt 0 ]; then
@@ -36,12 +40,6 @@ sed -i 's/\/auth//g' -- $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansib
 # using https
 sed -i 's/http:/https:/g' -- $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/common/import-base-realm.yaml
 sed -i 's/jboss-eap-rhel/rhbk/g' -- $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/common/recreate-db.yaml
-sudo chattr +i $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/common/install-sso-server.yaml
-sudo chattr +i $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/common/remove-sso-server.yaml
-sudo chattr +i $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/common/import-base-realm.yaml
-sudo chattr +i $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/common/recreate-db.yaml
-sudo chattr +i $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/install-ways/start-install-ways.yaml
-sudo chattr +i $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/install-ways/finish-install-ways.yaml
 
 # Startup script
 cp $SCRIPT_DIR/rhbk.service $HOME
@@ -56,17 +54,19 @@ ssh rhsso@sso sudo keytool -keystore /usr/lib/jvm/jre-17/lib/security/cacerts -i
 sudo cp $SCRIPT_DIR/keycloak-openshift-ca.crt /usr/share/pki/ca-trust-source/anchors/
 sudo update-ca-trust
 
-# OpenShift chages
+# OpenShift changes
 oc replace -f $SCRIPT_DIR/openshift-pullsecret.yaml
 oc create -f $SCRIPT_DIR/openshift-catalogsource.yaml
 cp $SCRIPT_DIR/openshift-sso-db-credentials.yaml $HOME/DO313/
 cp $SCRIPT_DIR/openshift-sso-secret.yaml $HOME/DO313/
 cp $SCRIPT_DIR/openshift-keycloak.yaml $HOME/DO313/
 cp $SCRIPT_DIR/installsso-main.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/ocp-installsso/roles/rhsso_remove/tasks/main.yaml
-sudo chattr +i $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/ocp-installsso/roles/rhsso_remove/tasks/main.yaml
 cp $SCRIPT_DIR/configsso-install.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/ocp-configsso/roles/rhsso_install/tasks/main.yaml
-sudo chattr +i $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/ocp-configsso/roles/rhsso_install/tasks/main.yaml
 cp $SCRIPT_DIR/configsso-resources.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/solutions/ocp-configsso/resources.yaml 
-sudo chattr +i $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/solutions/ocp-configsso/resources.yaml 
-rm -f $HOME/DO313/labs/ocp-configsso/*
-cp $SCRIPT_DIR/configsso-realmimport.yaml $HOME/DO313/labs/ocp-configsso/
+rm -f $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/ocp-configsso/*
+cp $SCRIPT_DIR/configsso-realmimport.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/ocp-configsso/
+
+# base url changes for labs
+find /home/student/.venv/labs/lib/python3.6/site-packages/do313/materials/labs -name application.properties | xargs sed -i 's|https://sso.lab.example.com:8080/auth/realms/rhtraining|https://sso.lab.example.com:8443/realms/rhtraining|g'
+find /home/student/.venv/labs/lib/python3.6/site-packages/do313/materials/labs -name keycloak.json | xargs sed -i 's|https://sso.lab.example.com:8080/auth/|https://sso.lab.example.com:8443/|g'
+
