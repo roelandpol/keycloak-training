@@ -1,0 +1,64 @@
+- name: Trust IdM CA
+  hosts: workstation
+  tasks:
+    - name: Trust IdM CA
+      shell: >
+        sudo trust anchor --store /home/student/DO313/labs/identity-federation/trainingca-ocp4-example-com-chain.pem
+
+- name: Verify IdM is working and create user
+  hosts: idm
+  remote_user: student
+  become: no
+
+  vars:
+    idm_admin_name: admin
+    idm_admin_pass: r3dh4t12342022
+    idm_user: jsmith
+    idm_password: redhat
+    idm_firstname: Jane
+    idm_lastname: Smith
+    idm_email: jsmith@example.com
+
+  tasks:
+    - name: Verify IdM is running
+      shell: "echo {{ idm_admin_pass }} | kinit {{ idm_admin_name }}"
+
+    - name: Check if the {{ idm_user }} user exists
+      shell: ipa user-find --login={{ idm_user }}
+      register: ipa_output
+      ignore_errors: true
+
+    - name: Create IdM user if it does not exist
+      shell: >
+        echo {{ idm_password }} | ipa user-add {{ idm_user }}
+        --first={{ idm_firstname }} --last={{ idm_lastname }}
+        --email={{ idm_email }} --password
+      when: ipa_output.stdout is not search('jsmith')
+
+
+- name: Create finance-web app client
+  hosts: sso
+  gather_facts: false
+
+  tasks:
+      - name: Configure kcadm credentials
+        command: >
+          sh /opt/rhbk-24.0.8/bin/kcadm.sh config credentials
+          --server https://sso.lab.example.com:8443/ --realm master
+          --user admin --password redhat
+
+      - name: Get clients
+        command: sh /opt/rhbk-24.0.8/bin/kcadm.sh get clients -r rhtraining --fields clientId
+        register: clients_output
+
+      - name: Create the finance-webapp client if it does not exist
+        command: >
+          sh /opt/rhbk-24.0.8/bin/kcadm.sh create clients -r rhtraining
+          -s clientId=finance-webapp -s enabled=true
+          -s rootUrl=http://localhost:8080/finance
+          -s clientAuthenticatorType=client-secret
+          -s secret=wRaGhUsdJKIe8PL0ShboprtyLDgzPd5H
+          -s protocol=openid-connect -s directAccessGrantsEnabled=false
+          -s publicClient=false
+        when: clients_output.stdout is not search('finance-webapp')
+
