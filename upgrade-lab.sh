@@ -54,6 +54,7 @@ cp $SCRIPT_DIR/identity-review-verify-idm.yaml $HOME/.venv/labs/lib/python3.6/si
 cp $SCRIPT_DIR/identity-review-verify-idm.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/identity-review/verify-user.yaml
 cp $SCRIPT_DIR/identity-review-verify-idm.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/identity-review/verify-user2.yaml
 cp $SCRIPT_DIR/identity-review-ocp-identity.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/identity-review/ocp-identity.yaml
+cp $SCRIPT_DIR/ocp-review-resources.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/solutions/ocp-review/resources.yaml
 
 sed -i 's/rh-sso-7.6/rhbk-24.0.8/g' -- $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/common/import-base-realm.yaml
 # remove /auth prefix since RHBK does not use that anymore

@@ -1,0 +1,101 @@
+apiVersion: project.openshift.io/v1
+kind: Project
+metadata:
+  name: review-project
+spec: {}
+---
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  labels:
+    app: finance-webapp
+    provider: jkube
+    version: 1.0.0-SNAPSHOT
+    group: com.example
+  name: finance-webapp
+  namespace: review-project
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    app: finance-webapp
+    provider: jkube
+    group: com.example
+  strategy:
+    rollingParams:
+      timeoutSeconds: 3600
+    type: Rolling
+  template:
+    metadata:
+      labels:
+        app: finance-webapp
+        provider: jkube
+        version: 1.0.0-SNAPSHOT
+        group: com.example
+      name: finance-webapp
+    spec:
+      containers:
+      - env:
+        - name: KUBERNETES_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: QUARKUS_OIDC_AUTH_SERVER_URL
+          value: "https://sso.apps.ocp4.example.com/realms/review-realm"
+        image: registry.ocp4.example.com:8443/redhattraining/do313-finance-webapp:v2.0
+        imagePullPolicy: IfNotPresent
+        name: quarkus
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        - containerPort: 9779
+          name: prometheus
+          protocol: TCP
+        - containerPort: 8778
+          name: jolokia
+          protocol: TCP
+        securityContext:
+          privileged: false
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: /metrics
+    prometheus.io/port: "9779"
+  labels:
+    app: finance-webapp
+    provider: jkube
+    version: 1.0.0-SNAPSHOT
+    group: com.example
+  name: finance-webapp
+  namespace: review-project
+spec:
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: finance-webapp
+    provider: jkube
+    group: com.example
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  labels:
+    app: finance-webapp
+    provider: jkube
+    version: 1.0.0-SNAPSHOT
+    group: com.example
+  name: finance-webapp
+  namespace: review-project
+spec:
+  port:
+    targetPort: 8080
+  to:
+    kind: Service
+    name: finance-webapp
