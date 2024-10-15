@@ -1,0 +1,51 @@
+---
+- name: Verify OpenShift as identity provider
+  hosts: sso
+  gather_facts: false
+
+  vars:
+    name_st : "\"displayName\" : \"{{ ocp_name }}\""
+    provider_st : "\"providerId\" : \"{{ ocp_provider }}\""
+    url_st : "\"baseUrl\" : \"{{ ocp_url }}\""
+    clientid_st : "\"clientId\" : \"{{ ocp_clientid }}\""
+
+  tasks:
+
+    - block:
+        - name: Configure kcadm credentials
+          command: >
+            sh /opt/rhbk-24.0.8/bin/kcadm.sh config credentials
+            --server https://sso.lab.example.com:8443 --realm master
+            --user admin --password redhat
+
+        - name: Get identity providers in rhtraining realm
+          command: sh /opt/rhbk-24.0.8/bin/kcadm.sh get identity-provider/instances -r rhtraining
+          register: identity_output
+
+        - name: Check if the {{ ocp_name }} identity provider exists
+          assert:
+            that:
+              - identity_output.stdout is search('{{ name_st }}')
+            success_msg: "The {{ ocp_name }} identity provider does exist in the {{ realm_name }} realm"
+            fail_msg: "The {{ ocp_name }} identity provider does not exist in the {{ realm_name }} realm"
+
+        - name: Check if {{ ocp_provider }} attribute is correctly set to {{ ocp_name }}
+          assert:
+            that:
+              - identity_output.stdout is search('{{ provider_st }}')
+            success_msg: "The {{ ocp_provider }} attribute is set for the {{ ocp_name }} identity provider"
+            fail_msg: "The {{ ocp_provider }} attribute is not set for the {{ ocp_name }} identity provider"
+
+        - name: Check if {{ ocp_url }} attribute is correctly set to {{ ocp_name }}
+          assert:
+            that:
+              - identity_output.stdout is search('{{ url_st }}')
+            success_msg: "The {{ ocp_url }} attribute is set for the {{ ocp_name }} identity provider"
+            fail_msg: "The {{ ocp_url }} attribute is not set for the {{ ocp_name }} identity provider"
+
+        - name: Check if {{ ocp_clientid }} attribute is correctly set to {{ ocp_name }}
+          assert:
+            that:
+              - identity_output.stdout is search('{{ clientid_st }}')
+            success_msg: "The {{ ocp_clientid }} attribute is set for the {{ ocp_name }} identity provider"
+            fail_msg: "The {{ ocp_clientid }} attribute is not set for the {{ ocp_name }} identity provider"

@@ -1,0 +1,97 @@
+---
+- name: Verify if a user exists in a realm
+  hosts: sso
+  gather_facts: false
+
+  vars:
+    firstname_st : "\"firstName\" : \"{{ user_firstname }}\""
+    lastname_st : "\"lastName\" : \"{{ user_lastname }}\""
+    email_st : "\"email\" : \"{{ user_email }}\""
+    enabled_st : "\"enabled\" : true"
+
+  tasks:
+
+    - block:
+        - name: Configure kcadm credentials
+          command: >
+            sh /opt/rhbk-24.0.8/bin/kcadm.sh config credentials
+            --server https://sso.lab.example.com:8443 --realm master
+            --user admin --password redhat
+
+        - name: Get users
+          command: sh /opt/rhbk-24.0.8/bin/kcadm.sh get users -r {{ realm_name }}
+          register: user_output
+
+        - name: Check if the {{ user_name }} user exists
+          assert:
+            that:
+              - user_output.stdout is search('{{ user_name }}')
+            success_msg: "The {{ user_name }} user does exist in the {{ realm_name }} realm in RH-SSO"
+            fail_msg: "The {{ user_name }} user does not exist in the {{ realm_name }} realm in RH-SSO"
+
+        - name: Check if the firstName attribute is correctly set to {{ user_firstname }}
+          assert:
+            that:
+              - user_output.stdout is search(firstname_st)
+            success_msg: "The firstName attribute is set for the {{ user_name }} user in RH-SSO"
+            fail_msg: "The firstName attribute is not set for the {{ user_name }} user in RH-SSO"
+
+        - name: Check if the lastName attribute is correctly set to {{ user_lastname }}
+          assert:
+            that:
+              - user_output.stdout is search(lastname_st)
+            success_msg: "The lastName attribute is set for the {{ user_name }} user in RH-SSO"
+            fail_msg: "The lastName attribute is not set for the {{ user_name }} user in RH-SSO"
+
+        - name: Check if the email attribute is correctly set to {{ user_email }}
+          assert:
+            that:
+              - user_output.stdout is search(email_st)
+            success_msg: "The email attribute is set for the {{ user_name }} user in RH-SSO"
+            fail_msg: "The email attribute is not set for the {{ user_name }} user in RH-SSO"
+
+        - name: Check if the user {{ user_name }} is enabled
+          assert:
+            that:
+              - user_output.stdout is search(enabled_st)
+            success_msg: "The {{ user_name }} user is enabled in RH-SSO"
+            fail_msg: "The {{ user_name }} user is not enabled in RH-SSO"
+
+
+
+- name: Verify the user is updated on IdM
+  hosts: idm
+  remote_user: student
+  become: no
+
+  vars:
+    idm_admin_name: admin
+    idm_admin_pass: r3dh4t12342022
+    ipa_firstname_st : "First name: {{ user_firstname }}"
+    ipa_email_st : "Email address: {{ user_email }}"
+
+  tasks:
+    - name: Verify IdM is running
+      shell: "echo {{ idm_admin_pass }} | kinit {{ idm_admin_name }}"
+
+    - name: Check if the {{ user_name }} user exists
+      shell: ipa user-find --login={{ user_name }}
+      register: ipa_output
+      ignore_errors: true
+
+    - debug:
+        var: ipa_output
+
+    - name: Check if the firstName attribute is correctly set to {{ user_firstname }}
+      assert:
+        that:
+          - ipa_output.stdout is search(ipa_firstname_st)
+        success_msg: "The firstName attribute is set for the {{ user_name }} user on IdM"
+        fail_msg: "The firstName attribute is not set for the {{ user_name }} user on IdM"
+
+    - name: Check if the email attribute is correctly set to {{ user_email }}
+      assert:
+        that:
+          - ipa_output.stdout is search(ipa_email_st)
+        success_msg: "The email attribute is set for the {{ user_name }} user on IdM"
+        fail_msg: "The email attribute is not set for the {{ user_name }} user on IdM"

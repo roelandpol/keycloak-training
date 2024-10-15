@@ -48,6 +48,12 @@ cp $SCRIPT_DIR/auth-review-verify-marketing-client.yaml $HOME/.venv/labs/lib/pyt
 cp $SCRIPT_DIR/auth-review-verify-realm.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/auth-review/verify-realm.yaml
 cp $SCRIPT_DIR/auth-review-verify-role.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/auth-review/verify-role.yaml
 cp $SCRIPT_DIR/auth-review-verify-user.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/auth-review/verify-user.yaml
+cp $SCRIPT_DIR/identity-review-start.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/identity-review/start-identity-review.yaml
+cp $SCRIPT_DIR/identity-review-verify-idm.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/identity-review/verify-idm.yaml
+cp $SCRIPT_DIR/identity-review-verify-idm.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/identity-review/verify-ocp.yaml
+cp $SCRIPT_DIR/identity-review-verify-idm.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/identity-review/verify-user.yaml
+cp $SCRIPT_DIR/identity-review-verify-idm.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/identity-review/verify-user2.yaml
+cp $SCRIPT_DIR/identity-review-ocp-identity.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/identity-review/ocp-identity.yaml
 
 sed -i 's/rh-sso-7.6/rhbk-24.0.8/g' -- $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/common/import-base-realm.yaml
 # remove /auth prefix since RHBK does not use that anymore

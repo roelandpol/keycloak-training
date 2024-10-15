@@ -1,0 +1,8 @@
+kind: OAuthClient
+apiVersion: oauth.openshift.io/v1
+metadata:
+  name: ocp-identity
+secret: mysecret
+redirectURIs:
+  - "https://sso.lab.example.com:8443/realms/rhtraining/broker/openshift-v4/endpoint"
+grantMethod: prompt

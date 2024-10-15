@@ -1,0 +1,44 @@
+---
+- name: Verify IdM as user federation provider
+  hosts: sso
+  gather_facts: false
+
+  vars:
+    name_st : "\"name\" : \"{{ idm_name }}\""
+    provider_st : "\"providerId\" : \"{{ idm_provider }}\""
+    mode_st : "\"{{ idm_mode }}\""
+
+  tasks:
+
+    - block:
+        - name: Configure kcadm credentials
+          command: >
+            sh /opt/rhbk-24.0.8/bin/kcadm.sh config credentials
+            --server https://sso.lab.example.com:8443 --realm master
+            --user admin --password redhat
+
+        - name: Get user federation providers in rhtraining realm
+          command: sh /opt/rhbk-24.0.8/bin/kcadm.sh get components -r rhtraining -q type=org.keycloak.storage.UserStorageProvider
+          register: userfederation_output
+
+        - name: Check if the {{ idm_name }} user federation exists
+          assert:
+            that:
+              - userfederation_output.stdout is search('{{ name_st }}')
+            success_msg: "The {{ idm_name }} user federation does exist in the {{ realm_name }} realm"
+            fail_msg: "The {{ idm_name }} user federation does not exist in the {{ realm_name }} realm"
+
+        - name: Check if {{ idm_provider }} attribute is correctly set to {{ idm_name }}
+          assert:
+            that:
+              - userfederation_output.stdout is search('{{ provider_st }}')
+            success_msg: "The {{ idm_provider }} attribute is set for the {{ idm_name }} user federation provider"
+            fail_msg: "The {{ idm_provider }} attribute is not set for the {{ idm_name }} user federation provider"
+
+        - name: Check if the {{ idm_mode }} mode is correctly set to {{ idm_name }}
+          assert:
+            that:
+              - userfederation_output.stdout is search('{{ mode_st }}')
+            success_msg: "The {{ idm_mode }} mode is set for the {{ idm_name }} user federation provider"
+            fail_msg: "The {{ idm_mode }} mode is not set for the {{ idm_name }} user federation provider"
+
