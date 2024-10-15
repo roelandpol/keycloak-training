@@ -1,0 +1,42 @@
+---
+- name: Verify the finance-webapp client
+  hosts: sso
+  gather_facts: false
+
+  tasks:
+
+    - block:
+        - name: Configure kcadm credentials
+          command: >
+            sh /opt/rhbk-24.0.8/bin/kcadm.sh config credentials
+            --server https://sso.lab.example.com:8443 --realm master
+            --user admin --password redhat
+
+        - name: Get ID of finance-webapp
+          shell: sh /opt/rhbk-24.0.8/bin/kcadm.sh get clients -r {{ realm_name }} --fields id,clientId | jq '. | map(. | select(.clientId=="finance-webapp"))' | grep id | cut -d':' -f2- | tr -d '"|,| '
+          register: id_output
+        - name: Check if the client exists
+          assert:
+            that:
+              -  id_output.stdout is search('-')
+            success_msg: "The client exists"
+            fail_msg: "The client does not exist"
+        - name: Get 'directaccessgrant' info
+          command: sh /opt/rhbk-24.0.8/bin/kcadm.sh get clients/{{ id_output.stdout }} -r {{ realm_name }} --fields directAccessGrantsEnabled
+          register: client_output
+
+        - name: Check if 'directaccessgrant' is disabled
+          assert:
+            that:
+              - client_output.stdout is search('false')
+            success_msg: "The direct access grant flow is not enabled"
+            fail_msg: "The direct access grant flow is enabled"
+        - name: get info about confidential client
+          command: sh /opt/rhbk-24.0.8/bin/kcadm.sh get clients/{{ id_output.stdout }} -r {{ realm_name }} --fields publicClient
+          register: client2_output
+        - name: Check if is a public client
+          assert:
+            that:
+              - client2_output.stdout is search('false')
+            success_msg: "The client is confidential"
+            fail_msg: "The client is public"

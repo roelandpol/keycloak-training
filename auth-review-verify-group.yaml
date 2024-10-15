@@ -1,0 +1,31 @@
+---
+- name: Verify if a group exists and is in an specific role
+  hosts: sso
+  gather_facts: false
+
+  tasks:
+
+    - block:
+        - name: Configure kcadm credentials
+          command: >
+            sh /opt/rhbk-24.0.8/bin/kcadm.sh config credentials
+            --server https://sso.lab.example.com:8443 --realm master
+            --user admin --password redhat
+        - name: Get groups of {{ realm_name }}
+          command: sh /opt/rhbk-24.0.8/bin/kcadm.sh get groups -r {{ realm_name }}
+          register: groups_output
+        - name: Check that the {{ group_name }} group exists
+          assert:
+            that:
+              - groups_output.stdout is search('{{  group_name }}')
+            success_msg: "The {{ group_name }} group exists"
+            fail_msg: "The {{ group_name }} group does not exist"
+        - name: Get roles of the {{ group_name }}
+          command: /opt/rhbk-24.0.8/bin/kcadm.sh get-roles -r {{ realm_name }} --gname {{ group_name }}
+          register: group_roles_output
+        - name: Check that the {{realm_role}} role exists
+          assert:
+            that:
+              - group_roles_output is search ('{{ realm_role_to_check }}')
+            success_msg: "The {{ group_name }} group is in the {{ realm_role_to_check }} role"
+            fail_msg: "The {{ group_name }} group is not in the {{ realm_role_to_check }} role"

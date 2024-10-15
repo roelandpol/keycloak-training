@@ -1,0 +1,24 @@
+---
+- name: Verify if realm exists in RH-SSO
+  hosts: sso
+  gather_facts: false
+
+  tasks:
+
+    - block:
+        - name: Configure kcadm credentials
+          command: >
+            sh /opt/rhbk-24.0.8/bin/kcadm.sh config credentials
+            --server https://sso.lab.example.com:8443/ --realm master
+            --user admin --password redhat
+
+        - name: Get realms
+          command: sh /opt/rhbk-24.0.8/bin/kcadm.sh get realms --fields realm
+          register: realm_output
+
+        - name: Check if {{ realm_name }} realm exists
+          assert:
+            that:
+              - realm_output.stdout is search('{{ realm_name }}')
+            success_msg: "The {{ realm_name }} realm does exist"
+            fail_msg: "The {{ realm_name }} realm does not exist"

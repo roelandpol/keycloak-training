@@ -1,0 +1,26 @@
+---
+- name: Verify service is running and enabled
+  hosts: sso
+  gather_facts: false
+
+  tasks:
+
+    - block:
+        - name: Check to see what services are running
+          service_facts:
+          register: ansible_services
+
+        - name: Check if rhbk service exists
+          assert:
+            that:
+              - "'rhbk.service' in ansible_services.ansible_facts.services"
+            success_msg: "The rhbk service does exist"
+            fail_msg: "The rhbk service does not exist"
+
+        - name: Check if rhbk service is running
+          assert:
+            that:
+              - ansible_services.ansible_facts.services['rhbk.service'].state == "running"
+            success_msg: "The rhbk service is running"
+            fail_msg: "The rhbk service is not running"
+

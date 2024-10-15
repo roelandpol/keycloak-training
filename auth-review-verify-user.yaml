@@ -1,0 +1,80 @@
+---
+- name: Verify if a user exists in a realm
+  hosts: sso
+  gather_facts: false
+
+  vars:
+    email_st : "\"email\" : \"{{ user_email }}\""
+    enabled_st : "\"enabled\" : true"
+
+  tasks:
+
+    - block:
+        - name: Configure kcadm credentials
+          command: >
+            sh /opt/rhbk-24.0.8/bin/kcadm.sh config credentials
+            --server https://sso.lab.example.com:8443 --realm master
+            --user admin --password redhat
+
+        - name: Get users
+          command: sh /opt/rhbk-24.0.8/bin/kcadm.sh get users -r {{ realm_name }}
+          register: user_output
+
+        - name: Check if the {{ user_name }} user exists
+          assert:
+            that:
+              - user_output.stdout is search('{{ user_name }}')
+            success_msg: "The {{ user_name }} user does exist in the {{ realm_name }} realm"
+            fail_msg: "The {{ user_name }} user does not exist in the {{ realm_name }} realm"
+
+        - debug:
+            var: firstname_st
+
+        - name: Check if the email attribute is correctly set to {{ user_email }}
+          assert:
+            that:
+              - user_output.stdout is search(email_st)
+            success_msg: "The email attribute is set for the {{ user_name }} user"
+            fail_msg: "The email attribute is not set for the {{ user_name }} user"
+
+        - name: Check if the user {{ user_name }} is enabled
+          assert:
+            that:
+              - user_output.stdout is search(enabled_st)
+            success_msg: "The {{ user_name }} user is enabled"
+            fail_msg: "The {{ user_name }} user is not enabled"
+
+        - name: Configure kcadm credentials for the {{ user_name }} user
+          command: >
+            sh /opt/rhbk-24.0.8/bin/kcadm.sh config credentials
+            --server https://sso.lab.example.com:8443 --realm {{ realm_name }}
+            --user {{ user_name }} --password {{ user_password }}
+          register: credentials_output
+          ignore_errors: yes
+
+        - name: Check if the password is set to {{ user_password }} for the {{ user_name }} user
+          assert:
+            that:
+              - credentials_output.rc == 0
+            success_msg: "The password is correctly set for the {{ user_name }} user"
+            fail_msg: "The password is not correctly set for the {{ user_name }} user"
+
+        - name: Configure kcadm credentials
+          command: >
+            sh /opt/rhbk-24.0.8/bin/kcadm.sh config credentials
+            --server https://sso.lab.example.com:8443 --realm master
+            --user admin --password redhat
+        - name: Check if {{ user_name }} is in the {{ realm_role_to_check }} role
+          command: >
+            sh /opt/rhbk-24.0.8/bin/kcadm.sh get-roles
+            -r {{ realm_name }}
+            --uusername {{ user_name }}
+            --effective
+          register: roles_output
+          ignore_errors: yes
+        - name: Check if {{ user_name }} is in the {{ realm_role_to_check }} role
+          assert:
+            that:
+              - roles_output.stdout is search('{{ realm_role_to_check }}')
+            success_msg: "The {{ user_name }} user is in the {{ realm_role_to_check }} role"
+            fail_msg: "The {{ user_name }} user is not in the {{ realm_role_to_check }} role"

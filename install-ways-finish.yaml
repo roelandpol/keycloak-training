@@ -1,0 +1,47 @@
+- name: Clean local RH-SSO installation
+  hosts: sso
+  remote_user: rhsso
+ 
+  vars:
+    sso_user: rhsso
+ 
+  tasks:
+    - name: Verify if SSO folder exists
+      stat:
+        path: /opt/rhbk-24.0.8
+      register: rhsso_folder
+ 
+    - name: Remove Red Hat SSO if the service is active
+      block:
+        - name: Stop and disable rhbk service
+          systemd:
+            name: rhbk
+            state: stopped
+            enabled: no
+          ignore_errors: true
+ 
+        - name: Remove service startup script
+          file:
+            path: /etc/systemd/system/rhbk.service
+            state: absent
+ 
+        - name: Remove RH SSO folder
+          file:
+            path: /opt/rhbk-24.0.8
+            state: absent
+ 
+        - name: Remove copied files from sso machine
+          file:
+            path: "/home/rhsso/{{ item }}"
+            state: absent
+          loop:
+            - rhbk-24.0.8.zip
+            - sso.lab.example.com.p12
+            - sso.lab.example.com.pem
+ 
+        - name: Reload systemd daemon
+          systemd:
+            daemon_reload: yes
+ 
+      when:
+        rhsso_folder.stat.exists

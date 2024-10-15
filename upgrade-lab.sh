@@ -32,10 +32,23 @@ scp $SCRIPT_DIR/rhbk-24.0.8.zip student@sso:
 # Replace playbooks
 cp $SCRIPT_DIR/install-sso-server.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/common/
 cp $SCRIPT_DIR/remove-sso-server.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/common/
-cp $SCRIPT_DIR/start-install-ways.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/install-ways/start-install-ways.yaml
-cp $SCRIPT_DIR/finish-install-ways.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/install-ways/finish-install-ways.yaml
+cp $SCRIPT_DIR/install-ways-start.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/install-ways/start-install-ways.yaml
+cp $SCRIPT_DIR/install-ways-finish.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/install-ways/finish-install-ways.yaml
 cp $SCRIPT_DIR/identity-broker-start.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/identity-broker/start-identity-broker.yaml
 cp $SCRIPT_DIR/identity-federation-start.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/identity-federation/start-identity-federation.yaml
+cp $SCRIPT_DIR/install-review-start.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/install-review/start-install-review.yaml
+cp $SCRIPT_DIR/install-review-finish.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/install-review/finish-install-review.yaml
+cp $SCRIPT_DIR/install-review-verify-realm.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/install-review/verify-realm.yaml
+cp $SCRIPT_DIR/install-review-verify-user.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/install-review/verify-user.yaml
+cp $SCRIPT_DIR/install-review-verify-database.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/install-review/verify-database.yaml
+cp $SCRIPT_DIR/install-review-verify-service.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/install-review/verify-service.yaml
+cp $SCRIPT_DIR/auth-review-verify-finance-webapp-client.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/auth-review/verify-finance-webapp-client.yaml
+cp $SCRIPT_DIR/auth-review-verify-group.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/auth-review/verify-group.yaml
+cp $SCRIPT_DIR/auth-review-verify-marketing-client.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/auth-review/verify-marketing-client.yaml
+cp $SCRIPT_DIR/auth-review-verify-realm.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/auth-review/verify-realm.yaml
+cp $SCRIPT_DIR/auth-review-verify-role.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/auth-review/verify-role.yaml
+cp $SCRIPT_DIR/auth-review-verify-user.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/auth-review/verify-user.yaml
+
 sed -i 's/rh-sso-7.6/rhbk-24.0.8/g' -- $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/common/import-base-realm.yaml
 # remove /auth prefix since RHBK does not use that anymore
 sed -i 's/\/auth//g' -- $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/common/import-base-realm.yaml

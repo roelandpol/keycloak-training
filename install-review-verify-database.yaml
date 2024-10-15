@@ -1,0 +1,20 @@
+---
+- name: Verify database connection
+  hosts: sso
+  gather_facts: false
+
+  tasks:
+
+    - block:
+        - name: Search the database connection in the logs
+          command: >
+            sh -c 'journalctl -u rhbk --no-pager | grep "Initializing master realm"'
+          register: db_connection
+          ignore_errors: yes
+
+        - name: Check the database connection
+          assert:
+            that:
+              - db_connection.failed == false
+            success_msg: "The database connection is present"
+            fail_msg: "The database connection is not present"

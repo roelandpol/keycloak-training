@@ -1,0 +1,23 @@
+---
+- name: Verify if a realm role exists
+  hosts: sso
+  gather_facts: false
+
+  tasks:
+
+    - block:
+        - name: Configure kcadm credentials
+          command: >
+            sh /opt/rhbk-24.0.8/bin/kcadm.sh config credentials
+            --server https://sso.lab.example.com:8443 --realm master
+            --user admin --password redhat
+
+        - name: Get roles of {{ realm_name }}
+          command: sh /opt/rhbk-24.0.8/bin/kcadm.sh get roles/{{ realm_role }} -r {{ realm_name}}
+          register: roles_output
+        - name: Check that the {{ realm_role }} role exists
+          assert:
+            that:
+              - roles_output is search('{{ realm_role }}')
+            success_msg: "The {{ realm_role }} role exists"
+            fail_msg: "The {{ realm_role }} role does not exist"

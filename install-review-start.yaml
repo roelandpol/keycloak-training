@@ -1,0 +1,27 @@
+- name: Copy certs to sso machine
+  hosts: workstation
+  tasks:
+    - name: Copy p12 file for https
+      shell: >
+        scp /home/student/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/common/sso.lab.example.com.p* rhsso@sso:/home/rhsso
+
+- name: Copy files
+  hosts: sso
+  remote_user: rhsso
+
+  vars:
+    sso_user: rhsso
+
+  tasks:
+    - name: Trust RH Training CA
+      shell: >
+        sudo trust anchor --store /home/rhsso/sso.lab.example.com.pem
+
+    - name: Copy JBoss EAP configuration file to RH SSO folder
+      copy:
+        src: /home/student/rhbk-24.0.8.zip
+        dest: /home/rhsso/
+        owner: "{{ sso_user }}"
+        group: "{{ sso_user }}"
+        remote_src: true
+

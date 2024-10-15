@@ -1,0 +1,48 @@
+---
+- name: Verify if realm exists in RH-SSO and has registration activated
+  hosts: sso
+  gather_facts: false
+
+  tasks:
+
+    - block:
+        - name: Configure kcadm credentials
+          command: >
+            sh /opt/rhbk-24.0.8/bin/kcadm.sh config credentials
+            --server https://sso.lab.example.com:8443 --realm master
+            --user admin --password redhat
+
+        - name: Get realms
+          command: sh /opt/rhbk-24.0.8/bin/kcadm.sh get realms --fields realm
+          register: realm_output
+
+        - name: Check if {{ realm_name }} realm exists
+          assert:
+            that:
+              - realm_output.stdout is search('{{ realm_name }}')
+            success_msg: "The {{ realm_name }} realm does exist"
+            fail_msg: "The {{ realm_name }} realm does not exist"
+
+        - name: Check realm {{ realm_name }} properties
+          command: sh /opt/rhbk-24.0.8/bin/kcadm.sh get realms/rhtraining --fields registrationAllowed
+          register: realm_registration_output
+
+        - name: Check if realm {{ realm_name }} has registration activated
+          assert:
+            that:
+              - realm_registration_output is search('true')
+            success_msg: "The {{ realm_name }} has the user registration activated"
+            fail_msg: "The {{ realm_name }} does not have the user registration activated"
+
+        - name: List password policies
+          command: sh /opt/rhbk-24.0.8/bin/kcadm.sh get realms/rhtraining  --fields passwordPolicy
+          register: pwd_output
+        - name: Check that the password policies are correctly
+          assert:
+            that:
+              #- pwd_output is search ('length\(10\) and specialChars\(1\)')
+              - "'length(10)' in pwd_output.stdout"
+              - "'specialChars(1)' in pwd_output.stdout"
+
+            success_msg: "The password policies are correct"
+            fail_msg: "The password policies are not correct"

@@ -1,0 +1,33 @@
+---
+- name: Verify the marketing-restful-api client
+  hosts: sso
+  gather_facts: false
+
+  tasks:
+
+    - block:
+        - name: Configure kcadm credentials
+          command: >
+            sh /opt/rhbk-24.0.8/bin/kcadm.sh config credentials
+            --server https://sso.lab.example.com:8443 --realm master
+            --user admin --password redhat
+
+        - name: Get ID of marketing-restful-api
+          shell: sh /opt/rhbk-24.0.8/bin/kcadm.sh get clients -r {{ realm_name }} --fields id,clientId | jq '. | map(. | select(.clientId=="marketing-restful-api"))' | grep id | cut -d':' -f2- | tr -d '"|,| '
+          register: id_output
+        - name: Check if the client exists
+          assert:
+            that:
+              -  id_output.stdout is search('-')
+            success_msg: "The client exists"
+            fail_msg: "The client does not exist"
+        - name: Get 'bearerOnly' info
+          command: sh /opt/rhbk-24.0.8/bin/kcadm.sh get clients/{{ id_output.stdout }} -r {{ realm_name }} --fields bearerOnly
+          register: client_output
+
+        - name: Check if 'bearerOnly' is enabled
+          assert:
+            that:
+              - client_output.stdout is search('true')
+            success_msg: "The client is bearerOnly"
+            fail_msg: "The client is not bearerOnly"
