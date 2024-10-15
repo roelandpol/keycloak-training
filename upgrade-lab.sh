@@ -83,14 +83,20 @@ sudo update-ca-trust
 # OpenShift changes
 oc replace -f $SCRIPT_DIR/openshift-pullsecret.yaml
 oc create -f $SCRIPT_DIR/openshift-catalogsource.yaml
-cp $SCRIPT_DIR/openshift-sso-db-credentials.yaml $HOME/DO313/
-cp $SCRIPT_DIR/openshift-sso-secret.yaml $HOME/DO313/
-cp $SCRIPT_DIR/openshift-keycloak.yaml $HOME/DO313/
+cp $SCRIPT_DIR/openshift-sso-db-credentials.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/ocp-configsso/
+cp $SCRIPT_DIR/openshift-sso-secret.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/ocp-configsso/
+cp $SCRIPT_DIR/openshift-keycloak.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/ocp-configsso/
+cp $SCRIPT_DIR/openshift-sso-db-credentials.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/ocp-review/
+cp $SCRIPT_DIR/openshift-sso-secret.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/ocp-review/
+cp $SCRIPT_DIR/openshift-keycloak.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/ocp-review/
 cp $SCRIPT_DIR/installsso-main.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/ocp-installsso/roles/rhsso_remove/tasks/main.yaml
 cp $SCRIPT_DIR/configsso-install.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/ocp-configsso/roles/rhsso_install/tasks/main.yaml
 cp $SCRIPT_DIR/configsso-resources.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/solutions/ocp-configsso/resources.yaml 
 rm -f $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/ocp-configsso/*
 cp $SCRIPT_DIR/configsso-realmimport.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/ocp-configsso/
+rm -f $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/ocp-review/*
+cp $SCRIPT_DIR/ocp-review-realmimport.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/ocp-review/
+
 
 # base url changes for labs
 find /home/student/.venv/labs/lib/python3.6/site-packages/do313/materials/labs -name application.properties | xargs sed -i 's|https://sso.lab.example.com:8080/auth/realms/rhtraining|https://sso.lab.example.com:8443/realms/rhtraining|g'
