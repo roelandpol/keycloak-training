@@ -1,0 +1,123 @@
+---
+#    _______________
+#   |  ___________  |
+#   | |           | |
+#   | |   o _ o   | |
+#   | |  \_____/  | |
+#   | |___________| |
+#   |_______________|
+#    __|_________|__
+#   / ************* \
+#  / *************** \
+#  -------------------
+#
+- name: Login to OpenShift cluster
+  shell:
+    cmd: oc login -u admin -p redhat {{ hub_cluster_host }}
+  environment:
+    KUBECONFIG: "{{ kubeconfig }}"
+
+- name: Check RHSSO operator Namespace
+  kubernetes.core.k8s_info:
+    kind: Namespace
+    name: "{{ sso_namespace }}"
+  register: rhsso_namespace_available
+
+- name: Retrieve CSV Subscription version
+  kubernetes.core.k8s_info:
+    api_version: operators.coreos.com/v1alpha1
+    kind: Subscription
+    name: "rhbk-operator"
+    namespace: "{{ sso_namespace }}"
+  register: rhsso_subs
+  ignore_errors: True
+
+- name: Remove keycloak
+  shell:
+    cmd: oc delete keycloak --all -n "{{ sso_namespace }}"
+  environment:
+    KUBECONFIG: "{{ kubeconfig }}"
+  when: rhsso_subs.resources[0].status.installedCSV is defined
+
+- name: Remove KeycloakRealmImport
+  shell:
+    cmd: oc delete KeycloakRealmImport --all -n "{{ sso_namespace }}"
+  environment:
+    KUBECONFIG: "{{ kubeconfig }}"
+  when: rhsso_subs.resources[0].status.installedCSV is defined
+
+- name: Ensure RHSSO Subscription is absent
+  kubernetes.core.k8s:
+    state: absent
+    definition:
+      apiVersion: operators.coreos.com/v1alpha1
+      kind: Subscription
+      metadata:
+        name: rhbk-operator
+      spec:
+        sourceNamespace: openshift-marketplace
+        source: redhat-operators
+        channel: "stable-v24"
+        installPlanApproval: Automatic
+        name: rhbk-operator
+        namespace: "{{ sso_namespace }}"
+  when: rhsso_namespace_available.resources[0].status is defined
+
+- name: Retrieve RHSSO OperatorGroup name
+  kubernetes.core.k8s_info:
+    api_version: operators.coreos.com/v1
+    kind: OperatorGroup
+    namespace: "{{ sso_namespace }}"
+  register: rhsso_opg
+  ignore_errors: True
+  when: rhsso_namespace_available.resources[0].status is defined
+
+- name: Ensure RHSSO OperatorGroup is absent
+  kubernetes.core.k8s:
+    state: absent
+    definition:
+      apiVersion: operators.coreos.com/v1
+      kind: OperatorGroup
+      metadata:
+        name: "{{ rhsso_opg.resources[0].metadata.name }}"
+  when: rhsso_namespace_available.resources[0].status is defined
+
+- name: Ensure RHSSO CSV is absent
+  kubernetes.core.k8s:
+    state: absent
+    api_version: operators.coreos.com/v1alpha1
+    kind: ClusterServiceVersion
+    name: "{{ rhsso_subs.resources[0].status.installedCSV }}"
+    namespace: "{{ sso_namespace }}"
+  when: rhsso_subs.resources | length > 0
+
+- name: Wait until no pods are running before removing the namespace
+  kubernetes.core.k8s_info:
+    kind: Pod
+    namespace: "{{ sso_namespace }}"
+  register: pod_list
+  retries: 30
+  delay: 20
+  until: pod_list.resources | length == 0
+
+
+- name: Ensure RHSSO operator Namespace is absent
+  kubernetes.core.k8s:
+    name: "{{ sso_namespace }}"
+    api_version: v1
+    kind: Namespace
+    state: absent
+  when: rhsso_namespace_available.resources[0].status is defined
+
+- name: Wait until RHSSO operator Namespace is absent
+  shell:
+    cmd: oc get namespace {{ sso_namespace }} -o jsonpath='{.status.phase}'
+  register: namespace_status
+  ignore_errors: True
+  retries: 30
+  delay: 20
+  until: '"not found" in namespace_status.stderr'
+
+
+
+

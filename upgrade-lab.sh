@@ -102,6 +102,7 @@ cp $SCRIPTDIR/compreview-keycloak.yaml $HOME/.venv/labs/lib/python3.6/site-packa
 cp $SCRIPTDIR/compreview-tls.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/compreview-rhsso/tls.yaml
 cp $SCRIPTDIR/compreview-secret.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/compreview-rhsso/secret.yaml
 cp $SCRIPTDIR/compreview-realm-import.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/compreview-rhsso/realm-import.yaml
+cp $SCRIPT_DIR/compreview-remove.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/compreview-rhsso/roles/rhsso_remove/tasks/main.yaml
 
 # base url changes for labs
 find /home/student/.venv/labs/lib/python3.6/site-packages/do313/materials/labs -name application.properties | xargs sed -i 's|https://sso.lab.example.com:8080/auth/realms/rhtraining|https://sso.lab.example.com:8443/realms/rhtraining|g'
@@ -110,3 +111,4 @@ find /home/student/.venv/labs/lib/python3.6/site-packages/do313/materials/labs -
 # RHBK24 UI does not work in old firefox. Give the student a push towards Chromium
 gsettings set org.gnome.shell favorite-apps "['chromium-browser.desktop', 'org.gnome.Terminal.desktop', 'org.gnome.gedit.desktop', 'org.gnome.Nautilus.desktop']"
 
+rm -f $HOME/.kube/config
