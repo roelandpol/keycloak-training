@@ -98,10 +98,10 @@ rm -f $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/ocp-revi
 cp $SCRIPT_DIR/ocp-review-realmimport.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/ocp-review/
 
 rm -f $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/compreview-rhsso/*.yaml
-cp $SCRIPTDIR/compreview-keycloak.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/compreview-rhsso/keycloak.yaml
-cp $SCRIPTDIR/compreview-tls.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/compreview-rhsso/tls.yaml
-cp $SCRIPTDIR/compreview-secret.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/compreview-rhsso/secret.yaml
-cp $SCRIPTDIR/compreview-realm-import.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/compreview-rhsso/realm-import.yaml
+cp $SCRIPT_DIR/compreview-keycloak.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/compreview-rhsso/keycloak.yaml
+cp $SCRIPT_DIR/compreview-tls.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/compreview-rhsso/tls.yaml
+cp $SCRIPT_DIR/compreview-secret.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/compreview-rhsso/secret.yaml
+cp $SCRIPT_DIR/compreview-realm-import.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/compreview-rhsso/realm-import.yaml
 cp $SCRIPT_DIR/compreview-remove.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/compreview-rhsso/roles/rhsso_remove/tasks/main.yaml
 
 # base url changes for labs
