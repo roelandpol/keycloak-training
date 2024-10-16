@@ -21,4 +21,7 @@ spec:
     - id: example-client
       publicClient: false
       rootUrl: http://example.com/
+      redirectUris:
+        - http://example.com/finance/*
+      
 

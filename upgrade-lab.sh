@@ -105,6 +105,7 @@ cp $SCRIPTDIR/compreview-realm-import.yaml $HOME/.venv/labs/lib/python3.6/site-p
 cp $SCRIPT_DIR/compreview-remove.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/compreview-rhsso/roles/rhsso_remove/tasks/main.yaml
 
 # base url changes for labs
+find /home/student/.venv/labs/lib/python3.6/site-packages/do313/materials/labs -name application.properties | xargs sed -i 's|https://keycloak-rhsso.apps.ocp4.example.com/auth/realms/rhtraining|https://sso.apps.ocp4.example.com/realms/rhtraining|g'
 find /home/student/.venv/labs/lib/python3.6/site-packages/do313/materials/labs -name application.properties | xargs sed -i 's|https://sso.lab.example.com:8080/auth/realms/rhtraining|https://sso.lab.example.com:8443/realms/rhtraining|g'
 find /home/student/.venv/labs/lib/python3.6/site-packages/do313/materials/labs -name keycloak.json | xargs sed -i 's|https://sso.lab.example.com:8080/auth/|https://sso.lab.example.com:8443/|g'
 
