@@ -1,0 +1,27 @@
+apiVersion: k8s.keycloak.org/v2alpha1
+kind: Keycloak
+metadata:
+  labels:
+    app: do313-keycloak
+  name: do313-keycloak
+  namespace: rhsso
+spec:
+  hostname:
+    hostname: HOSTNAME
+  http:
+    tlsSecret: sso-tls-secret
+  instances: 1
+  resources:
+    limits:
+      memory: 500M
+    requests:
+      memory: 100M
+  db:
+    usernameSecret:
+      name: sso-db-credentials
+      key: username
+    passwordSecret:
+      name: sso-db-credentials
+      key: password
+    vendor: postgres
+    url: 'jdbc:postgresql://DBHOSTNAME/DB' 

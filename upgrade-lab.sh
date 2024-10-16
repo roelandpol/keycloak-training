@@ -97,6 +97,11 @@ cp $SCRIPT_DIR/configsso-realmimport.yaml $HOME/.venv/labs/lib/python3.6/site-pa
 rm -f $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/ocp-review/*
 cp $SCRIPT_DIR/ocp-review-realmimport.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/ocp-review/
 
+rm -f $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/compreview-rhsso/*.yaml
+cp $SCRIPTDIR/compreview-keycloak.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/compreview-rhsso/keycloak.yaml
+cp $SCRIPTDIR/compreview-tls.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/compreview-rhsso/tls.yaml
+cp $SCRIPTDIR/compreview-secret.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/compreview-rhsso/secret.yaml
+cp $SCRIPTDIR/compreview-realm-import.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/compreview-rhsso/realm-import.yaml
 
 # base url changes for labs
 find /home/student/.venv/labs/lib/python3.6/site-packages/do313/materials/labs -name application.properties | xargs sed -i 's|https://sso.lab.example.com:8080/auth/realms/rhtraining|https://sso.lab.example.com:8443/realms/rhtraining|g'
