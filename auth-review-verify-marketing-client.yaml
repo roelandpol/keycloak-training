@@ -22,12 +22,12 @@
             success_msg: "The client exists"
             fail_msg: "The client does not exist"
         - name: Get 'bearerOnly' info
-          command: sh /opt/rhbk-24.0.8/bin/kcadm.sh get clients/{{ id_output.stdout }} -r {{ realm_name }} --fields bearerOnly
+          command: sh /opt/rhbk-24.0.8/bin/kcadm.sh get clients/{{ id_output.stdout }} -r {{ realm_name }} --fields standardFlowEnabled
           register: client_output
 
         - name: Check if 'bearerOnly' is enabled
           assert:
             that:
-              - client_output.stdout is search('true')
+              - client_output.stdout is search('false')
             success_msg: "The client is bearerOnly"
             fail_msg: "The client is not bearerOnly"
