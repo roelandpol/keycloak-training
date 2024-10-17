@@ -21,13 +21,13 @@ spec:
       redirectUris:
       - http://finance-webapp-review-project.apps.ocp4.example.com/finance/*
     users:
-    - username: student
-      firstName: Mister
-      lastName: Student
-      email: student@example.com
+    - username: developer
+      firstName: developer
+      lastName: developer
+      email: developer@example.com
       enabled: true
       credentials:
       - type: password
-        value: "student"
+        value: "redhat"
         temporary: false
 

@@ -1,0 +1,92 @@
+---
+#    _______________
+#   |  ___________  |
+#   | |           | |
+#   | |   o _ o   | |
+#   | |  \_____/  | |
+#   | |___________| |
+#   |_______________|
+#    __|_________|__
+#   / ************* \
+#  / *************** \
+#  -------------------
+#
+- name: Login to OpenShift cluster
+  shell:
+    cmd: oc login -u admin -p redhat {{ hub_cluster_host }}
+  environment:
+    KUBECONFIG: "{{ kubeconfig }}"
+
+- name: Retrieve keycloak name
+  shell:
+    cmd: oc get keycloak -n rhsso --no-headers | awk '{print $1}'
+  register: keycloak_name
+
+- name: Retrieve RH-SSO password
+  shell:
+    cmd: oc get secret do313-keycloak-initial-admin -n rhsso -o jsonpath="{.data.password}" | base64 -d
+  register: rhsso_pass
+
+- name: Configure kcadm credentials
+  command: >
+    sh /home/student/DO313/solutions/ocp-review/rhbk-24.0.8/bin/kcadm.sh
+    config credentials --server https://sso.apps.ocp4.example.com
+    --realm master --user admin --password {{ rhsso_pass.stdout }}
+
+
+- name: Get users
+  command: >
+    sh /home/student/DO313/solutions/ocp-review/rhbk-24.0.8/bin/kcadm.sh
+    get users -r {{ realm_name }} -q username={{ user_name }}
+  register: user_output
+
+- name: Check if the {{ user_name }} user exists
+  assert:
+    that:
+      - user_output.stdout is search('{{ user_name }}')
+    success_msg: "The {{ user_name }} user does exist in the {{ realm_name }} realm"
+    fail_msg: "The {{ user_name }} user does not exist in the {{ realm_name }} realm"
+
+- name: Check if the firstName attribute is correctly set to {{ user_firstname }}
+  assert:
+    that:
+      - user_output.stdout is search(firstname_st)
+    success_msg: "The firstName attribute is set for the {{ user_name }} user"
+    fail_msg: "The firstName attribute is not set for the {{ user_name }} user"
+
+- name: Check if the lastName attribute is correctly set to {{ user_lastname }}
+  assert:
+    that:
+      - user_output.stdout is search(lastname_st)
+    success_msg: "The lastName attribute is set for the {{ user_name }} user"
+    fail_msg: "The lastName attribute is not set for the {{ user_name }} user"
+
+- name: Check if the email attribute is correctly set to {{ user_email }}
+  assert:
+    that:
+      - user_output.stdout is search(email_st)
+    success_msg: "The email attribute is set for the {{ user_name }} user"
+    fail_msg: "The email attribute is not set for the {{ user_name }} user"
+
+- name: Check if the user {{ user_name }} is enabled
+  assert:
+    that:
+      - user_output.stdout is search(enabled_st)
+    success_msg: "The {{ user_name }} user is enabled"
+    fail_msg: "The {{ user_name }} user is not enabled"
+
+- name: Configure kcadm credentials for the {{ user_name }} user
+  command: >
+    sh /home/student/DO313/solutions/ocp-review/rhbk-24.0.8/bin/kcadm.sh
+    config credentials --server https://sso.apps.ocp4.example.com
+    --realm {{ realm_name }} --user {{ user_name }} --password {{ user_password }}
+  register: credentials_output
+  ignore_errors: true
+
+- name: Check if the password is set to {{ user_password }} for the {{ user_name }} user
+  assert:
+    that:
+      - credentials_output.rc == 0
+    success_msg: "The password is correctly set for the {{ user_name }} user"
+    fail_msg: "The password is not correctly set for the {{ user_name }} user"
+

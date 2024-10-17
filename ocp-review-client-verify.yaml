@@ -1,0 +1,42 @@
+---
+#    _______________
+#   |  ___________  |
+#   | |           | |
+#   | |   o _ o   | |
+#   | |  \_____/  | |
+#   | |___________| |
+#   |_______________|
+#    __|_________|__
+#   / ************* \
+#  / *************** \
+#  -------------------
+#
+- name: Login to OpenShift cluster
+  shell:
+    cmd: oc login -u admin -p redhat {{ hub_cluster_host }}
+  environment:
+    KUBECONFIG: "{{ kubeconfig }}"
+
+- name: Retrieve keycloak name
+  shell:
+    cmd: oc get keycloak -n rhsso --no-headers | awk '{print $1}'
+  register: keycloak_name
+
+- name: Retrieve RH-SSO password
+  shell:
+    cmd: oc get secret do313-keycloak-initial-admin -n rhsso -o jsonpath="{.data.password}" | base64 -d
+  register: rhsso_pass
+
+- name: Configure kcadm credentials
+  command: sh /home/student/DO313/solutions/ocp-review/rhbk-24.0.8/bin/kcadm.sh config credentials --server https://sso.apps.ocp4.example.com --realm master --user admin --password {{ rhsso_pass.stdout }}
+
+- name: Get ID of review-client
+  shell: sh /home/student/DO313/solutions/ocp-review/rhbk-24.0.8/bin/kcadm.sh get clients -r {{ realm_name }} --fields id,clientId | jq '. | map(. | select(.clientId=="review-client"))' | grep id | cut -d':' -f2- | tr -d '"|,| '
+  register: r_id_output
+
+- name: Check if the client exists
+  assert:
+    that:
+      -  r_id_output.stdout is search('-')
+    success_msg: "The review-client client exists"
+    fail_msg: "The review-client client does not exist"

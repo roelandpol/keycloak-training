@@ -1,0 +1,42 @@
+---
+#    _______________
+#   |  ___________  |
+#   | |           | |
+#   | |   o _ o   | |
+#   | |  \_____/  | |
+#   | |___________| |
+#   |_______________|
+#    __|_________|__
+#   / ************* \
+#  / *************** \
+#  -------------------
+#
+- name: Login to OpenShift cluster
+  shell:
+    cmd: oc login -u admin -p redhat {{ hub_cluster_host }}
+  environment:
+    KUBECONFIG: "{{ kubeconfig }}"
+
+- name: Check keycloak
+  shell:
+    cmd: oc get keycloak -n rhsso -o jsonpath="{.items[0].status.conditions[?(@.type=='Ready')].status}"
+  environment:
+    KUBECONFIG: "{{ kubeconfig }}"
+  register: keycloak_check
+
+- name: Keycloak should have reconciling status
+  debug:
+    msg: "Reconciling status for Keycloak is not available"
+  failed_when: keycloak_check.stdout != "True"
+
+- name: Check keycloakRealmImport
+  shell:
+    cmd: oc get keycloakrealmimport -n rhsso -o jsonpath="{.items[0].status.conditions[?(@.type=='Done')].status}"
+  environment:
+    KUBECONFIG: "{{ kubeconfig }}"
+  register: user_check
+
+- name: KeycloakUser should have "reconciled" status
+  debug:
+    msg: "Reconciled status for KeycloakUser is not available"
+  failed_when: user_check.stdout != "True"

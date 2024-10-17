@@ -55,6 +55,16 @@ cp $SCRIPT_DIR/identity-review-verify-idm.yaml $HOME/.venv/labs/lib/python3.6/si
 cp $SCRIPT_DIR/identity-review-verify-idm.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/identity-review/verify-user2.yaml
 cp $SCRIPT_DIR/identity-review-ocp-identity.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/identity-review/ocp-identity.yaml
 cp $SCRIPT_DIR/ocp-review-resources.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/solutions/ocp-review/resources.yaml
+mkdir $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/ocp-installsso
+cp $SCRIPT_DIR/openshift-sso-db-credentials.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/ocp-installsso/
+cp $SCRIPT_DIR/openshift-sso-secret.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/ocp-installsso/
+cp $SCRIPT_DIR/ocp-review-client-verify.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/ocp-review/roles/client_verify/tasks/main.yaml
+cp $SCRIPT_DIR/ocp-review-cr-check.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/ocp-review/roles/cr_check/tasks/main.yaml ocp-review-cr-check.yaml
+cp $SCRIPT_DIR/ocp-review-realm-verify.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/ocp-review/roles/realm_verify/tasks/main.yaml
+cp $SCRIPT_DIR/ocp-review-rhsso-check.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/ocp-review/roles/rhsso_check/tasks/main.yaml
+cp $SCRIPT_DIR/ocp-review-secret-verify.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/ocp-review/roles/secret_verify/tasks/main.yaml
+cp $SCRIPT_DIR/ocp-review-user-verify.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/ocp-review/roles/user_verify/tasks/main.yaml
+
 
 sed -i 's/rh-sso-7.6/rhbk-24.0.8/g' -- $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/common/import-base-realm.yaml
 # remove /auth prefix since RHBK does not use that anymore
