@@ -1,0 +1,58 @@
+---
+#    _______________
+#   |  ___________  |
+#   | |           | |
+#   | |   o _ o   | |
+#   | |  \_____/  | |
+#   | |___________| |
+#   |_______________|
+#    __|_________|__
+#   / ************* \
+#  / *************** \
+#  -------------------
+#
+- name: Login to OpenShift cluster
+  shell:
+    cmd: oc login -u admin -p redhat {{ hub_cluster_host }}
+  environment:
+    KUBECONFIG: "{{ kubeconfig }}"
+
+- name: Check RHSSO operator Namespace
+  kubernetes.core.k8s_info:
+    kind: Namespace
+    name: "{{ sso_namespace }}"
+  register: rhsso_namespace_available
+
+- name: rhsso namespace should be available
+  debug:
+    msg: "`rhsso` namespace is not available."
+  failed_when: rhsso_namespace_available.resources[0].status is not defined
+
+- name: Retrieve CSV Subscription version
+  kubernetes.core.k8s_info:
+    api_version: operators.coreos.com/v1alpha1
+    kind: Subscription
+    name: "rhbk-operator"
+    namespace: "{{ sso_namespace }}"
+  register: rhsso_subs
+  ignore_errors: True
+  when: rhsso_namespace_available.resources[0].status is defined
+
+- name: RHSSO CSV Subscription should be available
+  debug:
+    msg: "RHSSO CSV Subscription is not available."
+  failed_when: rhsso_subs.resources[0].status is not defined
+
+- name: Retrieve RHSSO OperatorGroup name
+  kubernetes.core.k8s_info:
+    api_version: operators.coreos.com/v1
+    kind: OperatorGroup
+    namespace: "{{ sso_namespace }}"
+  register: rhsso_opg
+  ignore_errors: True
+  when: rhsso_namespace_available.resources[0].status is defined
+
+- name: RHSSO OperatorGroup should be available
+  debug:
+    msg: "RHSSO OperatorGroup is not available."
+  failed_when: rhsso_opg.resources[0].status is not defined

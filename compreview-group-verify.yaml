@@ -1,0 +1,59 @@
+---
+#    _______________
+#   |  ___________  |
+#   | |           | |
+#   | |   o _ o   | |
+#   | |  \_____/  | |
+#   | |___________| |
+#   |_______________|
+#    __|_________|__
+#   / ************* \
+#  / *************** \
+#  -------------------
+#
+- name: Login to OpenShift cluster
+  shell:
+    cmd: oc login -u admin -p redhat {{ hub_cluster_host }}
+  environment:
+    KUBECONFIG: "{{ kubeconfig }}"
+
+- name: Retrieve keycloak name
+  shell:
+    cmd: oc get keycloak -n rhsso --no-headers | awk '{print $1}'
+  register: keycloak_name
+
+- name: Retrieve RH-SSO password
+  shell:
+    cmd: oc get secret {{ keycloak_name.stdout }}-initial-admin -n rhsso -o jsonpath="{.data.password}" | base64 -d
+  register: rhsso_pass
+
+- name: Configure kcadm credentials
+  command: sh /home/student/DO313/solutions/compreview-rhsso/rhbk-24.0.8/bin/kcadm.sh config credentials --server https://sso.apps.ocp4.example.com --realm master --user admin --password {{ rhsso_pass.stdout }}
+
+- name: Get groups of {{ realm_name }}
+  command: sh /home/student/DO313/solutions/compreview-rhsso/rhbk-24.0.8/bin/kcadm.sh get groups -r {{ realm_name }}
+  register: groups_output
+- name: Check that the {{ group_name }} group exists
+  assert:
+    that:
+      - groups_output.stdout is search('{{  group_name }}')
+    success_msg: "The {{ group_name }} group exists"
+    fail_msg: "The {{ group_name }} group does not exist"
+
+- name: Get roles of the {{ group_name }}
+  command: /home/student/DO313/solutions/compreview-rhsso/rhbk-24.0.8/bin/kcadm.sh get-roles -r {{ realm_name }} --gname {{ group_name }}
+  register: group_roles_output
+
+- name: Check that the {{realm_role_to_check}} role exists
+  assert:
+    that:
+      - group_roles_output is search ('{{ realm_role_to_check }}')
+    success_msg: "The {{ group_name }} group is in the {{ realm_role_to_check }} role"
+    fail_msg: "The {{ group_name }} group is not in the {{ realm_role_to_check }} role"
+
+- name: Check that the {{realm_role2_to_check}} role exists
+  assert:
+    that:
+      - group_roles_output is search ('{{ realm_role2_to_check }}')
+    success_msg: "The {{ group_name }} group is in the {{ realm_role2_to_check }} role"
+    fail_msg: "The {{ group_name }} group is not in the {{ realm_role2_to_check }} role"

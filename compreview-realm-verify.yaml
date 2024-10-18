@@ -1,0 +1,78 @@
+---
+#    _______________
+#   |  ___________  |
+#   | |           | |
+#   | |   o _ o   | |
+#   | |  \_____/  | |
+#   | |___________| |
+#   |_______________|
+#    __|_________|__
+#   / ************* \
+#  / *************** \
+#  -------------------
+#
+- name: Transfer file from sso to workstation
+  shell: >
+    scp student@sso:/home/student/rhbk-24.0.8.zip /home/student/DO313/solutions/compreview-rhsso
+
+- name: Unzip Red Hat SSO
+  unarchive:
+    src: /home/student/DO313/solutions/compreview-rhsso/rhbk-24.0.8.zip
+    dest: /home/student/DO313/solutions/compreview-rhsso/
+    creates: /home/student/DO313/solutions/compreview-rhsso/rhbk-24.0.8
+    owner: student
+    group: student
+    remote_src: true
+
+- name: Login to OpenShift cluster
+  shell:
+    cmd: oc login -u admin -p redhat {{ hub_cluster_host }}
+  environment:
+    KUBECONFIG: "{{ kubeconfig }}"
+
+- name: Retrieve keycloak name
+  shell:
+    cmd: oc get keycloak -n rhsso --no-headers | awk '{print $1}'
+  register: keycloak_name
+
+- name: Retrieve RH-SSO password
+  shell:
+    cmd: oc get secret do313-keycloak-initial-admin -n rhsso -o jsonpath="{.data.password}" | base64 -d
+  register: rhsso_pass
+
+- name: Configure kcadm credentials
+  command: sh /home/student/DO313/solutions/compreview-rhsso/rhbk-24.0.8/bin/kcadm.sh config credentials --server https://sso.apps.ocp4.example.com --realm master --user admin --password {{ rhsso_pass.stdout }}
+
+- name: Get realms
+  command: sh /home/student/DO313/solutions/compreview-rhsso/rhbk-24.0.8/bin/kcadm.sh get realms --fields realm
+  register: realm_output
+
+- name: Check if {{ realm_name }} realm exists
+  assert:
+    that:
+      - realm_output.stdout is search('{{ realm_name }}')
+    success_msg: "The {{ realm_name }} realm does exist"
+    fail_msg: "The {{ realm_name }} realm does not exist"
+
+- name: Check realm {{ realm_name }} properties
+  command: sh /home/student/DO313/solutions/compreview-rhsso/rhbk-24.0.8/bin/kcadm.sh get realms/rhtraining --fields registrationAllowed
+  register: realm_registration_output
+ 
+- name: Check if realm {{ realm_name }} has registration activated
+  assert:
+    that:
+      - realm_registration_output is search('true')
+    success_msg: "The {{ realm_name }} has the user registration activated"
+    fail_msg: "The {{ realm_name }} does not have the user registration activated"
+
+- name: List password policies
+  command: sh /home/student/DO313/solutions/compreview-rhsso/rhbk-24.0.8/bin/kcadm.sh get realms/rhtraining  --fields passwordPolicy
+  register: pwd_output
+
+- name: Check that the password policies are correctly
+  assert:
+    that:
+      - pwd_output is search ('length\(8\) and specialChars\(1\)')
+    success_msg: "The password policies are correct"
+    fail_msg: "The password policies are not correct"
+   

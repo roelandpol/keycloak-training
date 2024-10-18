@@ -1,0 +1,52 @@
+---
+#    _______________
+#   |  ___________  |
+#   | |           | |
+#   | |   o _ o   | |
+#   | |  \_____/  | |
+#   | |___________| |
+#   |_______________|
+#    __|_________|__
+#   / ************* \
+#  / *************** \
+#  -------------------
+#
+- name: Login to OpenShift cluster
+  shell:
+    cmd: oc login -u admin -p redhat {{ hub_cluster_host }}
+  environment:
+    KUBECONFIG: "{{ kubeconfig }}"
+
+- name: Retrieve keycloak name
+  shell:
+    cmd: oc get keycloak -n rhsso --no-headers | awk '{print $1}'
+  register: keycloak_name
+
+- name: Retrieve RH-SSO password
+  shell:
+    cmd: oc get secret {{ keycloak_name.stdout }}-initial-admin -n rhsso -o jsonpath="{.data.password}" | base64 -d
+  register: rhsso_pass
+
+- name: Configure kcadm credentials
+  command: sh /home/student/DO313/solutions/compreview-rhsso/rhbk-24.0.8/bin/kcadm.sh config credentials --server https://sso.apps.ocp4.example.com --realm master --user admin --password {{ rhsso_pass.stdout }}
+
+- name: Get ID of finance-webapp
+  shell: sh /home/student/DO313/solutions/compreview-rhsso/rhbk-24.0.8/bin/kcadm.sh get clients -r {{ realm_name }} --fields id,clientId | jq '. | map(. | select(.clientId=="finance-webapp"))' | grep id | cut -d':' -f2- | tr -d '"|,| '
+  register: f_id_output
+
+- name: Check if the client exists
+  assert:
+    that:
+      -  f_id_output.stdout is search('-')
+    success_msg: "The finance-webapp client exists"
+    fail_msg: "The finance-webapp client does not exist"
+
+- name: Get ID of marketing-restful-api
+  shell: sh /home/student/DO313/solutions/compreview-rhsso/rhbk-24.0.8/bin/kcadm.sh get clients -r {{ realm_name }} --fields id,clientId | jq '. | map(. | select(.clientId=="marketing-restful-api"))' | grep id | cut -d':' -f2- | tr -d '"|,| '
+  register: id_output
+- name: Check if the client exists
+  assert:
+    that:
+      -  id_output.stdout is search('-')
+    success_msg: "The marketing-restful-api client exists"
+    fail_msg: "The marketing-restful-api client does not exist"

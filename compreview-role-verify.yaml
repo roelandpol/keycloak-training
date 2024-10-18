@@ -1,0 +1,51 @@
+---
+#    _______________
+#   |  ___________  |
+#   | |           | |
+#   | |   o _ o   | |
+#   | |  \_____/  | |
+#   | |___________| |
+#   |_______________|
+#    __|_________|__
+#   / ************* \
+#  / *************** \
+#  -------------------
+#
+- name: Login to OpenShift cluster
+  shell:
+    cmd: oc login -u admin -p redhat {{ hub_cluster_host }}
+  environment:
+    KUBECONFIG: "{{ kubeconfig }}"
+
+- name: Retrieve keycloak name
+  shell:
+    cmd: oc get keycloak -n rhsso --no-headers | awk '{print $1}'
+  register: keycloak_name
+
+- name: Retrieve RH-SSO password
+  shell:
+    cmd: oc get secret {{ keycloak_name.stdout }}-initial-admin -n rhsso -o jsonpath="{.data.password}" | base64 -d
+  register: rhsso_pass
+
+- name: Configure kcadm credentials
+  command: sh /home/student/DO313/solutions/compreview-rhsso/rhbk-24.0.8/bin/kcadm.sh config credentials --server https://sso.apps.ocp4.example.com --realm master --user admin --password {{ rhsso_pass.stdout }}
+
+- name: Get roles of {{ realm_name }}
+  command: sh /home/student/DO313/solutions/compreview-rhsso/rhbk-24.0.8/bin/kcadm.sh get roles/{{ realm_role1 }} -r {{ realm_name}}
+  register: roles_output
+- name: Check that the {{ realm_role1 }} role exists
+  assert:
+    that:
+      - roles_output is search('{{ realm_role1 }}')
+    success_msg: "The {{ realm_role1 }} role exists"
+    fail_msg: "The {{ realm_role1 }} role does not exist"
+
+- name: Get roles of {{ realm_name }}
+  command: sh /home/student/DO313/solutions/compreview-rhsso/rhbk-24.0.8/bin/kcadm.sh get roles/{{ realm_role2 }} -r {{ realm_name}}
+  register: roles_output
+- name: Check that the {{ realm_role2 }} role exists
+  assert:
+    that:
+      - roles_output is search('{{ realm_role2 }}')
+    success_msg: "The {{ realm_role2 }} role exists"
+    fail_msg: "The {{ realm_role2 }} role does not exist"

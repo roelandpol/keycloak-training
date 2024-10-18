@@ -114,6 +114,16 @@ cp $SCRIPT_DIR/compreview-secret.yaml $HOME/.venv/labs/lib/python3.6/site-packag
 cp $SCRIPT_DIR/compreview-realm-import.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/compreview-rhsso/realm-import.yaml
 cp $SCRIPT_DIR/compreview-remove.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/compreview-rhsso/roles/rhsso_remove/tasks/main.yaml
 
+cp $SCRIPT_DIR/compreview-client-verify.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/compreview-rhsso/roles/client_verify/tasks/main.yaml
+cp $SCRIPT_DIR/compreview-group-verify.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/compreview-rhsso/roles/group_verify/tasks/main.yaml
+cp $SCRIPT_DIR/compreview-idm-verify.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/compreview-rhsso/roles/idm_verify/tasks/main.yaml
+cp $SCRIPT_DIR/compreview-realm-verify.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/compreview-rhsso/roles/realm_verify/tasks/main.yaml
+cp $SCRIPT_DIR/compreview-rhsso-check.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/compreview-rhsso/roles/rhsso_check/tasks/main.yaml 
+cp $SCRIPT_DIR/compreview-role-verify.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/compreview-rhsso/roles/role_verify/tasks/main.yaml
+cp $SCRIPT_DIR/compreview-secret-verify.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/compreview-rhsso/roles/secret_verify/tasks/main.yaml
+cp $SCRIPT_DIR/compreview-user-role-verify.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/compreview-rhsso/roles/user_role_verify/tasks/main.yaml
+cp $SCRIPT_DIR/compreview-user-verify.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/compreview-rhsso/roles/user_verify/tasks/main.yaml
+
 # base url changes for labs
 find /home/student/.venv/labs/lib/python3.6/site-packages/do313/materials/labs -name application.properties | xargs sed -i 's|https://keycloak-rhsso.apps.ocp4.example.com/auth/realms/rhtraining|https://sso.apps.ocp4.example.com/realms/rhtraining|g'
 find /home/student/.venv/labs/lib/python3.6/site-packages/do313/materials/labs -name application.properties | xargs sed -i 's|https://sso.lab.example.com:8080/auth/realms/rhtraining|https://sso.lab.example.com:8443/realms/rhtraining|g'
