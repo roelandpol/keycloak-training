@@ -59,7 +59,7 @@ mkdir $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/ocp-inst
 cp $SCRIPT_DIR/openshift-sso-db-credentials.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/ocp-installsso/
 cp $SCRIPT_DIR/openshift-sso-secret.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/materials/labs/ocp-installsso/
 cp $SCRIPT_DIR/ocp-review-client-verify.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/ocp-review/roles/client_verify/tasks/main.yaml
-cp $SCRIPT_DIR/ocp-review-cr-check.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/ocp-review/roles/cr_check/tasks/main.yaml ocp-review-cr-check.yaml
+cp $SCRIPT_DIR/ocp-review-cr-check.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/ocp-review/roles/cr_check/tasks/main.yaml
 cp $SCRIPT_DIR/ocp-review-realm-verify.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/ocp-review/roles/realm_verify/tasks/main.yaml
 cp $SCRIPT_DIR/ocp-review-rhsso-check.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/ocp-review/roles/rhsso_check/tasks/main.yaml
 cp $SCRIPT_DIR/ocp-review-secret-verify.yaml $HOME/.venv/labs/lib/python3.6/site-packages/do313/ansible/ocp-review/roles/secret_verify/tasks/main.yaml
